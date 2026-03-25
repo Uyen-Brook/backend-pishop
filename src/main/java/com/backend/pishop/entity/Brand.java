@@ -1,0 +1,32 @@
+package com.backend.pishop.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+@Entity
+@Table(name = "brands")
+@Getter
+@Setter
+public class Brand {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "brand_name", nullable = false)
+    private String name;
+
+    private String image;
+    private String website;
+
+    // 1 Brand có nhiều Product
+    @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Product> products = new ArrayList<>();
+}
