@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.backend.pishop.entity.Brand;
 
 @Repository
-public interface BrandRepository extends JpaRepository<Brand, Integer> {
+public interface BrandRepository extends JpaRepository<Brand, Long> {
 	List<Brand> findAllByOrderByNameAsc();
 }

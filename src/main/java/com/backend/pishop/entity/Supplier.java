@@ -32,6 +32,8 @@ public class Supplier {
     private String address;
     
     private String note;
+    
+    private String website;
 
     // 1 Supplier có nhiều Product
     @OneToMany(mappedBy = "supplier", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

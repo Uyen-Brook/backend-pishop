@@ -1,6 +1,5 @@
 package com.backend.pishop.service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import com.backend.pishop.entity.Address;
 import com.backend.pishop.entity.Province;
 import com.backend.pishop.entity.User;
 import com.backend.pishop.entity.Ward;
+import com.backend.pishop.enums.ResourceType;
 import com.backend.pishop.mapper.AddressMapper;
 import com.backend.pishop.mapper.ProfileMapper;
 import com.backend.pishop.repository.AccountRepository;
@@ -39,7 +39,7 @@ public class ProfileService {
 	private final ProvinceRepository ProvinceRepository;
 	private final WardRepository WardRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final CloudinaryService CloudinaryService;
+	private final CloudinaryService coudinaryService;
 	
 	// 1. register
 	public Account register(RegisterRequest req) {
@@ -142,7 +142,7 @@ public class ProfileService {
 	            .orElseThrow(() -> new RuntimeException("Account not found"));
 
 	    // 2. Upload ảnh lên Cloudinary
-	    String imageUrl = CloudinaryService.uploadImage(file);
+	    String imageUrl = coudinaryService.uploadImage(file, ResourceType.AVATAR);
 		
 	    // 3. Lưu URL vào account
 	    account.setImage(imageUrl);

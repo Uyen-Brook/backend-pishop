@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.backend.pishop.enums.AccountRank;
+import com.backend.pishop.enums.AccountRole;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,6 +41,14 @@ public class Account {
     private boolean isActive;
 
     private String image;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private AccountRole role;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rank")
+    private AccountRank rank;
 
     @Column(name = "create_at")
     private LocalDateTime createAt;
@@ -56,6 +68,6 @@ public class Account {
     // 1 Account có 1 User
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
-  
+    
 }
 

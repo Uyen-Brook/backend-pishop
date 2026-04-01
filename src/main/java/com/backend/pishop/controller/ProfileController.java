@@ -24,45 +24,32 @@ import com.backend.pishop.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/api/profile")
+@RequestMapping("/api/user/profile")
 @RequiredArgsConstructor
 public class ProfileController {
 	private final ProfileService profileService;
 	
 	// get profile infor by account id
-	@GetMapping("/{accountId}")
+	@GetMapping("/infor/{accountId}")
 	public ResponseEntity<?> getProfile(@PathVariable Long accountId) {
 	    return ResponseEntity.ok(profileService.getProfile(accountId));
 	}
 	// update profile
-	@PutMapping("/{id}")
+	@PutMapping("/infor/update/{id}")
 	public ResponseEntity<?> updateProfile(@PathVariable Long id,
 										   @RequestBody UpdateProfileRequest req) {
 		return ResponseEntity.ok(profileService.updateProfile(id, req));
 	}
 	
-	//1 update account
-	@PutMapping("/account/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id,
-                                    @RequestBody UpdateAccountRequest req) {
-        return ResponseEntity.ok(profileService.updateAccount(id, req));
-    }
 	//2. update avatar
-    @PutMapping("/avatar/{id}")
+    @PostMapping("/avatar/{id}")
     public ResponseEntity<?> upload(@PathVariable Long id,
                                     @RequestParam MultipartFile file) throws IOException {
         return ResponseEntity.ok(profileService.uploadAvatar(id, file));
     }
     
-    // 3. update user
-    @PutMapping("/user/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id,
-                                        @RequestBody UpdateUserRequest req) {
-        return ResponseEntity.ok(profileService.updateUser(id, req));
-    }
-    
     // get all address by account id
-    @GetMapping("/account/{accountId}")
+    @GetMapping("/address/{accountId}")
     public ResponseEntity<?> getAll(@PathVariable Long accountId) {
         return ResponseEntity.ok(profileService.getAllByAccount(accountId));
     }
@@ -88,6 +75,7 @@ public class ProfileController {
     	profileService.setDefault(id, accountId);
         return ResponseEntity.ok("ok");
     }
+    
     // delete address by id
     @DeleteMapping("/address/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {

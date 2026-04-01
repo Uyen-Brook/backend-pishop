@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import com.backend.pishop.entity.Category;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Integer> {
+public interface CategoryRepository extends JpaRepository<Category, Long> {
 	List<Category> findAllByOrderByNameAsc();
 
-    Optional<Category> findById(Integer id); // NÊN khai báo generic
+    Optional<Category> findById(Long id); // NÊN khai báo generic
 }

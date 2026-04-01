@@ -3,21 +3,63 @@ package com.backend.pishop.repository;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.backend.pishop.entity.Product;
+import com.backend.pishop.response.ProductSumaryResponse;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+	@EntityGraph(attributePaths = {
+	        "brand",
+	        "supplier",
+	        "category",
+	        "productPromotions",
+	        "productPromotions.promotion"
+	    })
+	    List<Product> findAll();
 
-    // Lấy theo brand
-    List<Product> findByBrandId(Integer brandId, Sort sort);
+	    @EntityGraph(attributePaths = {
+	        "brand",
+	        "supplier",
+	        "category",
+	        "productPromotions",
+	        "productPromotions.promotion"
+	    })
+	    List<Product> findByBrand_Id(Long brandId);
 
-    // Lấy theo supplier
-    List<Product> findBySupplierId(Integer supplierId, Sort sort);
+	    @EntityGraph(attributePaths = {
+	        "brand",
+	        "supplier",
+	        "category",
+	        "productPromotions",
+	        "productPromotions.promotion"
+	    })
+	    List<Product> findByCategory_Id(Long categoryId);
 
-    // Lấy theo category
-    List<Product> findByCategoryId(Integer categoryId, Sort sort);
+	    @EntityGraph(attributePaths = {
+	        "brand",
+	        "supplier",
+	        "category",
+	        "productPromotions",
+	        "productPromotions.promotion"
+	    })
+	    List<Product> findBySupplier_Id(Long supplierId);
+
+	    // 🔥 combo filter
+	    @EntityGraph(attributePaths = {
+	        "brand",
+	        "supplier",
+	        "category",
+	        "productPromotions",
+	        "productPromotions.promotion"
+	    })
+	    List<Product> findByBrand_IdAndCategory_IdAndSupplier_Id(
+	            Long brandId, Long categoryId, Long supplierId);
+
+
 }

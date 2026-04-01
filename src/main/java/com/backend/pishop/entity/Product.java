@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
+import com.backend.pishop.enums.ProductStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
@@ -16,7 +19,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "model_name", nullable = false)
     private String modelName;
@@ -29,8 +32,8 @@ public class Product {
     @Column(columnDefinition = "TEXT")// giống file html hoặc text để lưu mô tả chi tiết sản phẩm, có thể bao gồm cả hình ảnh, video trình bày về sản phẩm...
     private String description;
 
-    @Column(name = "base_price", precision = 12, scale = 2)
-    private BigDecimal basePrice;
+    @Column(name = "price", precision = 12, scale = 2)
+    private BigDecimal price;
 
     @Column(name = "model_number")
     private String modelNumber;
@@ -38,8 +41,13 @@ public class Product {
     @Column(name = "list_image", columnDefinition = "TEXT")
     private String listImage;
     
-    @Column(name = "product_status")// khuyến mãi, mới, cũ, hết hàng, ngừng bán...
-    private String ProductStatus;
+    @Column(name = "quanlity", nullable = false)
+    private Integer quanlity;
+    
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "product_status")
+    private ProductStatus productStatus;
 
     @Column(name = "create_at")
     private LocalDateTime createAt;
@@ -64,4 +72,9 @@ public class Product {
     @JsonBackReference
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+    
+    // promotion
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProductPromotion> productPromotions = new HashSet<>();
+
 }

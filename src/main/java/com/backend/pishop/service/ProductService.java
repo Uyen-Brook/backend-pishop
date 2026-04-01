@@ -1,35 +1,32 @@
 package com.backend.pishop.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.backend.pishop.entity.Brand;
-import com.backend.pishop.entity.Category;
 import com.backend.pishop.entity.Product;
-import com.backend.pishop.entity.Supplier;
 import com.backend.pishop.mapper.BrandMapper;
-import com.backend.pishop.mapper.CategoryDetailMapper;
 import com.backend.pishop.mapper.CategoryMapper;
 import com.backend.pishop.mapper.ProductMapper;
 import com.backend.pishop.mapper.SupplierMapper;
 import com.backend.pishop.repository.BrandRepository;
 import com.backend.pishop.repository.CategoryRepository;
+import com.backend.pishop.repository.ProductPromotionRepository;
 import com.backend.pishop.repository.ProductRepository;
+import com.backend.pishop.repository.PromotionRepository;
 import com.backend.pishop.repository.SupplierRepository;
 import com.backend.pishop.response.BrandRespone;
-import com.backend.pishop.response.CategoryDetailResponse;
 import com.backend.pishop.response.CategoryResponse;
-import com.backend.pishop.response.ProductResponse;
+import com.backend.pishop.response.ProductSumaryResponse;
+import com.backend.pishop.response.SupplierDetailResponse;
 import com.backend.pishop.response.SupplierResponse;
-
 import lombok.RequiredArgsConstructor;
-
-import jakarta.persistence.criteria.Predicate;
-
-import org.springframework.data.domain.Sort;
 
 @Service
 @RequiredArgsConstructor
@@ -39,141 +36,156 @@ public class ProductService {
     private final BrandRepository brandRepository;
     private final SupplierRepository supplierRepository;
     private final CategoryRepository categoryRepository;
-
-    // ================= PRODUCT =================
-
-    // get all product (sort desc)
-    public List<ProductResponse> getAllProducts(String sortBy) {
-        return productRepository.findAll(Sort.by(Sort.Direction.DESC, sortBy))
-        		.stream()
-        		.map(ProductMapper::toResponse)
-        		.toList();
-    }
-
-    // search product
-    public List<ProductResponse> searchProducts(
-            String name,
-            String brand,
-            String supplier,
-            BigDecimal minPrice,
-            BigDecimal maxPrice,
-            String status
-    ) {
-        return productRepository.findAll(
-                (root, query, cb) -> {
-                    List<Predicate> predicates = new ArrayList<>();
-
-                    if (name != null) {
-                        predicates.add(cb.like(cb.lower(root.get("modelName")), "%" + name.toLowerCase() + "%"));
-                    }
-
-                    if (brand != null) {
-                        predicates.add(cb.like(cb.lower(root.join("brand").get("brandName")), "%" + brand.toLowerCase() + "%"));
-                    }
-
-                    if (supplier != null) {
-                        predicates.add(cb.like(cb.lower(root.join("supplier").get("name")), "%" + supplier.toLowerCase() + "%"));
-                    }
-
-                    if (minPrice != null) {
-                        predicates.add(cb.greaterThanOrEqualTo(root.get("basePrice"), minPrice));
-                    }
-
-                    if (maxPrice != null) {
-                        predicates.add(cb.lessThanOrEqualTo(root.get("basePrice"), maxPrice));
-                    }
-
-                    if (status != null) {
-                        predicates.add(cb.equal(root.get("ProductStatus"), status));
-                    }
-
-                    return cb.and(predicates.toArray(new Predicate[0]));
-                }
-        ).stream().map(ProductMapper::toResponse).toList();
-        		
-    }
-
-    public List<ProductResponse> getProductsByBrand(Integer brandId) {
-        return productRepository.findByBrandId(brandId, Sort.by(Sort.Direction.DESC, "createAt"))
-        		.stream().map(ProductMapper::toResponse).toList();
-    }
-
-    public List<ProductResponse> getProductsBySupplier(Integer supplierId) {
-        return productRepository.findBySupplierId(supplierId, Sort.by(Sort.Direction.DESC, "createAt"))
-        		.stream().map(ProductMapper::toResponse).toList();
-    }
-
-    public List<ProductResponse> getProductsByCategory(Integer categoryId) {
-        return productRepository.findByCategoryId(categoryId, Sort.by(Sort.Direction.DESC, "createAt"))
-        		.stream().map(ProductMapper::toResponse).toList();
-    }
-
-    // ================= BRAND =================
-
-    public List<BrandRespone> getAllBrands() {
-        return brandRepository.findAllByOrderByNameAsc()
-        		.stream().map(BrandMapper::toResponse).toList();
-    }
-
-    public Brand getBrandDetail(Integer id) {
-        return brandRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("Brand not found"));
-    }
-
-    // ================= SUPPLIER =================
-
-    public List<SupplierResponse> getAllSuppliers() {
-        return supplierRepository.findAllByOrderByNameDesc()
-        		.stream().map(SupplierMapper::toResponse).toList();
-    }
-
-    public Supplier getSupplierDetail(Long id) {
-        return supplierRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("Supplier not found"));
-    }
-
-    public List<Supplier> searchSuppliers(
-            String name,
-            String email,
-            String taxcode,
-            String phone,
-            String note
-    ) {
-        return supplierRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (name != null)
-                predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
-
-            if (email != null)
-                predicates.add(cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
-
-            if (taxcode != null)
-                predicates.add(cb.like(root.get("taxcode"), "%" + taxcode + "%"));
-
-            if (phone != null)
-                predicates.add(cb.like(root.get("phone"), "%" + phone + "%"));
-
-            if (note != null)
-                predicates.add(cb.like(cb.lower(root.get("note")), "%" + note.toLowerCase() + "%"));
-
-            return cb.and(predicates.toArray(new Predicate[0]));
-        });
-    }
-
-    // ================= CATEGORY =================
-
-    public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAllByOrderByNameAsc()
-                .stream()
-                .map(CategoryMapper::toResponse) // giả sử toResponse(Category c)
+    private final PromotionRepository promotionService;
+    private final ProductPromotionRepository productPromotionRepository;
+ 
+ 
+    // ============================
+    // LẤY TẤT CẢ SẢN PHẨM (FULL GRAPH)
+    // ============================
+    public List<ProductSumaryResponse> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                .map(ProductMapper::toSummaryResponse)
                 .toList();
     }
 
-    public CategoryDetailResponse getCategoryDetail(Integer id) {
-        return categoryRepository.findById(id)
-                .map(CategoryDetailMapper::toResponse)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+    // ============================
+    // LỌC THEO BRAND
+    // ============================
+    public List<ProductSumaryResponse> getProductsByBrand(Long brandId) {
+        List<Product> products = productRepository.findByBrand_Id(brandId);
+        return products.stream()
+                .map(ProductMapper::toSummaryResponse)
+                .toList();
     }
+
+    // ============================
+    // LỌC THEO CATEGORY
+    // ============================
+    public List<ProductSumaryResponse> getProductsByCategory(Long categoryId) {
+        List<Product> products = productRepository.findByCategory_Id(categoryId);
+        return products.stream()
+                .map(ProductMapper::toSummaryResponse)
+                .toList();
+    }
+
+    // ============================
+    // LỌC THEO SUPPLIER
+    // ============================
+    public List<ProductSumaryResponse> getProductsBySupplier(Long supplierId) {
+        List<Product> products = productRepository.findBySupplier_Id(supplierId);
+        return products.stream()
+                .map(ProductMapper::toSummaryResponse)
+                .toList();
+    }
+
+    // ============================
+    // COMBO FILTER (brand + category + supplier)
+    // ============================
+    public List<ProductSumaryResponse> filterProducts(Long brandId, Long categoryId, Long supplierId) {
+
+        // Nếu cả 3 đều null → trả về tất cả
+        if (brandId == null && categoryId == null && supplierId == null) {
+            return getAllProducts().stream()
+                    .map(p -> ProductMapper.toSummaryResponse(
+                            productRepository.findById(p.getId()).orElse(null)
+                    ))
+                    .toList();
+        }
+
+        // Nếu đủ cả 3 → dùng combo query
+        if (brandId != null && categoryId != null && supplierId != null) {
+            List<Product> products = productRepository
+                    .findByBrand_IdAndCategory_IdAndSupplier_Id(brandId, categoryId, supplierId);
+
+            return products.stream()
+                    .map(ProductMapper::toSummaryResponse)
+                    .toList();
+        }
+
+        // Nếu chỉ có brand
+        if (brandId != null && categoryId == null && supplierId == null) {
+            return getProductsByBrand(brandId);
+        }
+
+        // Nếu chỉ có category
+        if (categoryId != null && brandId == null && supplierId == null) {
+            return getProductsByCategory(categoryId);
+        }
+
+        // Nếu chỉ có supplier
+        if (supplierId != null && brandId == null && categoryId == null) {
+            return getProductsBySupplier(supplierId);
+        }
+
+        // Nếu có 2 filter → dùng Specification (nếu bạn muốn)
+        // Nhưng tạm thời mình dùng filter thủ công
+        List<Product> all = productRepository.findAll();
+
+        return all.stream()
+                .filter(p -> brandId == null || p.getBrand().getId().equals(brandId))
+                .filter(p -> categoryId == null || p.getCategory().getId().equals(categoryId))
+                .filter(p -> supplierId == null || p.getSupplier().getId().equals(supplierId))
+                .map(ProductMapper::toSummaryResponse)
+                .toList();
+    }
+    
+//    // 1. get all product + promotion
+//    public List<ProductSumaryResponse> getAllProductsWithPromotion() {
+//		List<ProductSumaryResponse> products = productRepository.getAllProductSummary();
+//		return products;
+//	}
+//    
+//    // 2. get product by category id + promotion
+//    public List<ProductSumaryResponse> getAllProductByCategoryId(Long id) {
+//		List<ProductSumaryResponse> products = productRepository.getAllProductSummaryByCategoryId(id);
+//		return products;
+//	}
+//    
+//    // 3. get product by brand id + promotion
+//    
+//    public List<ProductSumaryResponse> getAllProductByBrandId(Long id) {
+//		List<ProductSumaryResponse> products = productRepository.getAllProductSummaryByBrandId(id);
+//		return products;
+//	}
+//    
+//    //4. get product by supplier id + promotion
+//    public List<ProductSumaryResponse> getAllProductSupplierId(Long id) {
+//		List<ProductSumaryResponse> products = productRepository.getAllProductSummaryBySupplierId(id);
+//		return products;
+//	}
+    
+    
+    public List<CategoryResponse> getAllCategories() {
+    	return categoryRepository.findAll().stream()
+				.map(CategoryMapper::toResponse)
+				.toList();
+	}
+    
+    public List<BrandRespone> getAllBrands() {
+    	return brandRepository.findAll().stream()
+    			.map(BrandMapper::toResponse)
+    			.toList();
+    }
+    
+    public List<SupplierResponse> getAllSuppliers() {
+		return supplierRepository.findAll().stream()
+				.map(SupplierMapper::toResponse)
+				.toList();
+	}
+    
+    
+    public BrandRespone getBrandDetailById(Long id) {
+        return brandRepository.findById(id)
+                .map(BrandMapper::toResponse)
+                .orElseThrow();
+    }
+    
+    public SupplierDetailResponse getSupplierDetailById(Long id) {
+		return supplierRepository.findById(id)
+				.map(SupplierMapper::toResponseDetail)
+				.orElseThrow();
+	}
 
 }

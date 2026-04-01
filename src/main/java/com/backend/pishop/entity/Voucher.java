@@ -3,31 +3,70 @@ package com.backend.pishop.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.backend.pishop.enums.AccountRank;
+import com.backend.pishop.enums.DiscountType;
+
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(
+    name = "vouchers",
+    indexes = {
+        @Index(name = "idx_voucher_code", columnList = "voucher_code")
+    }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Voucher {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String voucherCode;       // Mã voucher (có thể null nếu là voucher cá nhân)
-    private String voucherType;       // public, personal, shop, shopee, freeship, new_user
+    @Column(name = "voucher_code", nullable = false, unique = true)
+    private String voucherCode;
 
-    private String discountType;      // percent, fixed_amount
-    private BigDecimal discountValue; // 10%, 50k...
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_type", nullable = false)
+    private DiscountType discountType;
 
-    private BigDecimal maxDiscountAmount; // Giới hạn giảm tối đa
-    private BigDecimal minOrderValue;     // Điều kiện đơn hàng tối thiểu
+    @Column(name = "discount_value", nullable = false)
+    private BigDecimal discountValue;
 
-    private Integer usageLimit;       // Tổng số lượt toàn hệ thống
-    private Integer currentUsage;     // Đã dùng bao nhiêu lượt
+    @Column(name = "max_discount_amount")
+    private BigDecimal maxDiscountAmount;
 
-    private Integer perUserLimit;     // Mỗi user được dùng bao nhiêu lần
+    @Column(name = "min_order_value")
+    private BigDecimal minOrderValue;
 
-    private LocalDateTime startDateTime;
-    private LocalDateTime endDateTime;
+    @Column(name = "usage_limit")
+    private Integer usageLimit;
 
-    private String status;            // active, inactive, expired
+    @Column(name = "current_usage", nullable = false)
+    @Builder.Default
+    private Integer currentUsage = 0;
+
+    @Column(name = "per_user_limit")
+    private Integer perUserLimit;
+
+    @Column(name = "start_at")
+    private LocalDateTime startAt;
+
+    @Column(name = "end_at")
+    private LocalDateTime endAt;
+
+    @Column(name = "is_active")
+    private boolean isActive;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "required_rank")
+    private AccountRank requiredRank;
 }
