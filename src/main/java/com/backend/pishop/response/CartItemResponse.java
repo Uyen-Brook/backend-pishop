@@ -6,12 +6,12 @@ import java.time.LocalDate;
 import com.backend.pishop.enums.DiscountType;
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-@Builder
+
+@Data
 public class CartItemResponse {
 
     private Long productId;
