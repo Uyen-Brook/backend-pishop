@@ -25,6 +25,10 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Column(name = "to_phone", nullable = false)
     private String toPhone;
@@ -42,10 +46,20 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "province_code")
     private Province province;
-
+    // tông tiền trước khi áp dụng voucher
     @Column(name = "total_amount", precision = 12, scale = 2)
     private BigDecimal totalAmount;
-
+    // tiền giảm giá từ voucher
+    @Column(name = "discount_amount", precision = 12, scale = 2)
+    private BigDecimal discountAmount;
+    // ma voucher đã áp dụng, lưu để dễ dàng truy vấn và hiển thị lịch sử đơn hàng
+    @Column(name = "voucher_code")
+    private String voucherCode;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucher_id")
+    private Voucher voucher;
+    
     @Column(name = "ship_fee", precision = 12, scale = 2)
     private BigDecimal shipFee = BigDecimal.ZERO;
 

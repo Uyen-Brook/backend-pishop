@@ -85,7 +85,7 @@ public class ProductService {
     // ============================
     public List<ProductSumaryResponse> filterProducts(Long brandId, Long categoryId, Long supplierId) {
 
-        // Nếu cả 3 đều null → trả về tất cả
+        // Nếu cả 3 đều null
         if (brandId == null && categoryId == null && supplierId == null) {
             return getAllProducts().stream()
                     .map(p -> ProductMapper.toSummaryResponse(
@@ -94,7 +94,7 @@ public class ProductService {
                     .toList();
         }
 
-        // Nếu đủ cả 3 → dùng combo query
+        // dùng combo query
         if (brandId != null && categoryId != null && supplierId != null) {
             List<Product> products = productRepository
                     .findByBrand_IdAndCategory_IdAndSupplier_Id(brandId, categoryId, supplierId);
@@ -104,22 +104,21 @@ public class ProductService {
                     .toList();
         }
 
-        // Nếu chỉ có brand
+        // brand
         if (brandId != null && categoryId == null && supplierId == null) {
             return getProductsByBrand(brandId);
         }
 
-        // Nếu chỉ có category
+        // Nếu  category
         if (categoryId != null && brandId == null && supplierId == null) {
             return getProductsByCategory(categoryId);
         }
 
-        // Nếu chỉ có supplier
+        // Nếu supplier
         if (supplierId != null && brandId == null && categoryId == null) {
             return getProductsBySupplier(supplierId);
         }
 
-        // Nếu có 2 filter → dùng Specification (nếu bạn muốn)
         // Nhưng tạm thời mình dùng filter thủ công
         List<Product> all = productRepository.findAll();
 
@@ -130,32 +129,7 @@ public class ProductService {
                 .map(ProductMapper::toSummaryResponse)
                 .toList();
     }
-    
-//    // 1. get all product + promotion
-//    public List<ProductSumaryResponse> getAllProductsWithPromotion() {
-//		List<ProductSumaryResponse> products = productRepository.getAllProductSummary();
-//		return products;
-//	}
-//    
-//    // 2. get product by category id + promotion
-//    public List<ProductSumaryResponse> getAllProductByCategoryId(Long id) {
-//		List<ProductSumaryResponse> products = productRepository.getAllProductSummaryByCategoryId(id);
-//		return products;
-//	}
-//    
-//    // 3. get product by brand id + promotion
-//    
-//    public List<ProductSumaryResponse> getAllProductByBrandId(Long id) {
-//		List<ProductSumaryResponse> products = productRepository.getAllProductSummaryByBrandId(id);
-//		return products;
-//	}
-//    
-//    //4. get product by supplier id + promotion
-//    public List<ProductSumaryResponse> getAllProductSupplierId(Long id) {
-//		List<ProductSumaryResponse> products = productRepository.getAllProductSummaryBySupplierId(id);
-//		return products;
-//	}
-    
+
     
     public List<CategoryResponse> getAllCategories() {
     	return categoryRepository.findAll().stream()

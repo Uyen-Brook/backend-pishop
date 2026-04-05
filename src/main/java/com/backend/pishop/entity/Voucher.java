@@ -2,9 +2,12 @@ package com.backend.pishop.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.backend.pishop.enums.AccountRank;
 import com.backend.pishop.enums.DiscountType;
+import com.backend.pishop.enums.VoucherType;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -67,6 +70,13 @@ public class Voucher {
     private boolean isActive;
     
     @Enumerated(EnumType.STRING)
+    @Column(name = "voucher_type")
+    private VoucherType type; // ORDER, SHIPPING
+    
+    @Enumerated(EnumType.STRING)
     @Column(name = "required_rank")
     private AccountRank requiredRank;
+    
+    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AccountVoucher> voucher = new ArrayList<>();
 }

@@ -20,10 +20,18 @@ public class OrderItem {
 
     @Column(nullable = false)
     private Integer quantity;
-
+    
+    // giá sản phẩm tại thời điểm mua
     @Column(name = "price", precision = 12, scale = 2)
     private BigDecimal price;
+    
+    // giá sau khi giảm giá
+    @Column(name = "discount_price", precision = 12, scale = 2)
+    private BigDecimal discountPrice;
 
+    @Column(name = "promotion_id")
+    private Long promotionId;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
@@ -31,7 +39,6 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
-
 
     // Nếu cần quản lý serial cho từng item
     @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)

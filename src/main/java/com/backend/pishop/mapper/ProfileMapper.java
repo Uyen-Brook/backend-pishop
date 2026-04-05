@@ -17,9 +17,12 @@ public class ProfileMapper {
                 account.getLastName(), // chú ý sửa tên field trong Account
                 account.getImage(),
                 account.getCreateAt(),
+                account.getPoint(),
+                account.getRank(),
                 user != null ? user.getPhoneNumber() : null,
                 account.getEmail(),
                 user != null ? user.isGender() : null
+                
         );
     }
 }

@@ -60,6 +60,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 	    })
 	    List<Product> findByBrand_IdAndCategory_IdAndSupplier_Id(
 	            Long brandId, Long categoryId, Long supplierId);
-
+	   
 
 }

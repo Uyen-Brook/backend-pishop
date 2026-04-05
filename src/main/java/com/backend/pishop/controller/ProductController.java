@@ -32,7 +32,7 @@ public class ProductController {
 	@Autowired
     private final ProductService productService; 
 
-    // ✅ lấy tất cả
+    // lấy tất cả
     @GetMapping("/products")
     public ResponseEntity<List<ProductSumaryResponse>> getAll() {
         return ResponseEntity.ok(productService.getAllProducts());

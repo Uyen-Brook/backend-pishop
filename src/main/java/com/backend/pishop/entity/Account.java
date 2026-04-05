@@ -45,10 +45,9 @@ public class Account {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private AccountRole role;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(name = "rank")
-    private AccountRank rank;
+  
+    @Column(name = "point")
+    private Integer point;
 
     @Column(name = "create_at")
     private LocalDateTime createAt;
@@ -68,6 +67,20 @@ public class Account {
     // 1 Account có 1 User
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
+    
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AccountVoucher> accountVoucher = new ArrayList<>();
+    
+    
+    public AccountRank getRank() {
+        if (point == null || point == 0) return AccountRank.NEW;
+        if (point < 200) return AccountRank.BRONZE;
+        if (point < 500) return AccountRank.SILVER;
+        if (point < 700) return AccountRank.GOLD;
+        if (point < 1000) return AccountRank.DIAMOND;
+        return AccountRank.VIP;
+    }
+
     
 }
 
