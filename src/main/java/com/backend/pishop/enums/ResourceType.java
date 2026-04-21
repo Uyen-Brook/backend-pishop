@@ -4,5 +4,6 @@ public enum ResourceType {
 	AVATAR,
 	PRODUCT,
 	LOGO,
+	CATEGORY,
 	OTHER
 }

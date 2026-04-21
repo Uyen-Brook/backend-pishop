@@ -14,7 +14,8 @@ public class SupplierMapper {
 	        dto.setLogo(supplier.getLogo());
 	        return dto;
 	  }
-	 public  static SupplierDetailResponse toResponseDetail(Supplier supplier) {
+	 
+	 public static SupplierDetailResponse toResponseDetail(Supplier supplier) {
 		 SupplierDetailResponse dto = new SupplierDetailResponse();
 		 dto.setId(supplier.getId());
 		 dto.setName(supplier.getName());

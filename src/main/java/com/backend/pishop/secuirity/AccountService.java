@@ -32,6 +32,7 @@ public class AccountService implements UserDetailsService {
                 true,
                 List.of(new SimpleGrantedAuthority("ROLE_" + account.getRole().name()))
         );
+        
     }
 
     public Account findByEmail(String email) {

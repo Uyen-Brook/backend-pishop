@@ -15,6 +15,7 @@ import java.util.List;
 import com.backend.pishop.enums.OrderStatus;
 import com.backend.pishop.enums.PayStatus;
 import com.backend.pishop.enums.PaymentMethod;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "orders")
@@ -85,6 +86,7 @@ public class Order {
     private LocalDateTime lastUpdate;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<OrderItem> items = new ArrayList<>();
 
     // Quan hệ 1-N với PaymentTransaction

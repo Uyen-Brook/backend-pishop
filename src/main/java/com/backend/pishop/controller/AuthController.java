@@ -12,7 +12,7 @@ import com.backend.pishop.request.RegisterRequest;
 import com.backend.pishop.service.AuthService;
 
 @Controller
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
 public class AuthController {
 	@Autowired
 	private AuthService authService;

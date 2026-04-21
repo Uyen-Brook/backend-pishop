@@ -21,7 +21,7 @@ import com.backend.pishop.repository.ProductPromotionRepository;
 import com.backend.pishop.repository.ProductRepository;
 import com.backend.pishop.repository.PromotionRepository;
 import com.backend.pishop.repository.SupplierRepository;
-import com.backend.pishop.response.BrandRespone;
+import com.backend.pishop.response.BrandResponse;
 import com.backend.pishop.response.CategoryResponse;
 import com.backend.pishop.response.ProductSumaryResponse;
 import com.backend.pishop.response.SupplierDetailResponse;
@@ -49,6 +49,8 @@ public class ProductService {
                 .map(ProductMapper::toSummaryResponse)
                 .toList();
     }
+    
+
 
     // ============================
     // LỌC THEO BRAND
@@ -137,7 +139,7 @@ public class ProductService {
 				.toList();
 	}
     
-    public List<BrandRespone> getAllBrands() {
+    public List<BrandResponse> getAllBrands() {
     	return brandRepository.findAll().stream()
     			.map(BrandMapper::toResponse)
     			.toList();
@@ -150,7 +152,7 @@ public class ProductService {
 	}
     
     
-    public BrandRespone getBrandDetailById(Long id) {
+    public BrandResponse getBrandDetailById(Long id) {
         return brandRepository.findById(id)
                 .map(BrandMapper::toResponse)
                 .orElseThrow();

@@ -1,13 +1,11 @@
-package com.backend.pishop.response;
+package com.backend.pishop.request;
 
 import lombok.Data;
 
 @Data
-public class CategoryResponse {
-    private Long id;
+public class CategoryRequest {
     private String name;
     private String description;
-    private String image;
     private String icon;
     private String note;
 }

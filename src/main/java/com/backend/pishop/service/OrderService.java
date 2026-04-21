@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 
 import org.springframework.stereotype.Service;
-
 import com.backend.pishop.entity.Account;
 import com.backend.pishop.entity.AccountVoucher;
 import com.backend.pishop.entity.Order;
@@ -44,224 +45,273 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class OrderService {
 
-    private final ProductRepository productRepository;
-    private final AccountRepository accountRepository;
-    private final VoucherRepository voucherRepository;
-    private final ProductPromotionRepository productPromotionRepository;
-    private final PromotionRepository promotionRepository;
-    private final OrderRepository orderRepository;
-    private final AccountVoucherRepository accountVoucherRepository;
-    private final ProvinceRepository provinceRepository;
-    private final WardRepository wardRepository;
+	private final ProductRepository productRepository;
+	private final AccountRepository accountRepository;
+	private final VoucherRepository voucherRepository;
+	private final ProductPromotionRepository productPromotionRepository;
+	private final PromotionRepository promotionRepository;
+	private final OrderRepository orderRepository;
+	private final AccountVoucherRepository accountVoucherRepository;
+	private final ProvinceRepository provinceRepository;
+	private final WardRepository wardRepository;
+	private final EmailService emailService;
 
-    @Transactional
-    public Order createOrder(OrderRequest request) {
+	@Transactional
+	public Order createOrder(OrderRequest request) {
 
-        // 1. Lấy account
-        Account account = accountRepository.findById(request.getAccountId())
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+		// Validate OrderRequest input
+		if (request == null) {
+			throw new IllegalArgumentException("Order request must not be null");
+		}
+		if (request.getAccountId() == null) {
+			throw new IllegalArgumentException("Account ID is required");
+		}
+		if (request.getToName() == null || request.getToName().trim().isEmpty() || request.getToName().length() > 100) {
+			throw new IllegalArgumentException("Recipient name is required and must be less than 100 characters");
+		}
+		if (request.getToPhone() == null || !request.getToPhone().matches("^(0|\\+84)[0-9]{9,10}$")) {
+			throw new IllegalArgumentException("Invalid phone number format");
+		}
+		if (request.getToAddress() == null || request.getToAddress().trim().isEmpty() || request.getToAddress().length() > 255) {
+			throw new IllegalArgumentException("Address is required and must be less than 255 characters");
+		}
+		if (request.getToProvinceCode() == null || request.getToProvinceCode().trim().isEmpty()) {
+			throw new IllegalArgumentException("Province code is required");
+		}
+		if (request.getToWardCode() == null || request.getToWardCode().trim().isEmpty()) {
+			throw new IllegalArgumentException("Ward code is required");
+		}
+		if (request.getPaymentMethod() == null) {
+			throw new IllegalArgumentException("Payment method is required");
+		}
+		if (request.getItems() == null || request.getItems().isEmpty()) {
+			throw new IllegalArgumentException("Order must contain at least one item");
+		}
+		// Validate each OrderItemRequest
+		int idx = 0;
+		for (OrderItemRequest item : request.getItems()) {
+			if (item == null) {
+				throw new IllegalArgumentException("Order item at index " + idx + " is null");
+			}
+			if (item.getProductId() == null) {
+				throw new IllegalArgumentException("Product ID is required for item at index " + idx);
+			}
+			if (item.getQuantity() == null || item.getQuantity() <= 0) {
+				throw new IllegalArgumentException("Quantity must be greater than 0 for item at index " + idx);
+			}
+			idx++;
+		}
 
-        // 2. Tạo order
-        Order order = new Order();
-        order.setAccount(account);
-        order.setToName(request.getToName());
-        order.setToPhone(request.getToPhone());
-        order.setToAddress(request.getToAddress());
-        order.setPaymentMethod(request.getPaymentMethod());
+		// 1. Lấy account
+		Account account = accountRepository.findById(request.getAccountId())
+				.orElseThrow(() -> new RuntimeException("Account not found"));
 
-        order.setOrderStatus(OrderStatus.PENDDING);
-        order.setPayStatus(PayStatus.UNPAID);
-        order.setCreateAt(LocalDateTime.now());
+		// 2. Tạo order
+		Order order = new Order();
+		order.setAccount(account);
+		order.setToName(request.getToName());
+		order.setToPhone(request.getToPhone());
+		order.setToAddress(request.getToAddress());
+		order.setPaymentMethod(request.getPaymentMethod());
 
-        // 3. Gán địa chỉ
-        Province province = provinceRepository.findById(request.getToProvinceCode())
-                .orElseThrow(() -> new RuntimeException("Province not found"));
+		order.setOrderStatus(OrderStatus.PENDDING);
+		order.setPayStatus(PayStatus.UNPAID);
+		order.setCreateAt(LocalDateTime.now());
 
-        Ward ward = wardRepository.findById(request.getToWardCode())
-                .orElseThrow(() -> new RuntimeException("Ward not found"));
+		// 3. Gán địa chỉ
+		Province province = provinceRepository.findById(request.getToProvinceCode())
+				.orElseThrow(() -> new RuntimeException("Province not found"));
 
-        order.setProvince(province);
-        order.setWard(ward);
+		Ward ward = wardRepository.findById(request.getToWardCode())
+				.orElseThrow(() -> new RuntimeException("Ward not found"));
 
-        // 4. Build OrderItems + tính tổng tiền
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        
-        // kiểm tra số lượng item có lớn hơn số lượng còn lại không
-        // gủi gmail,
-        // xử lý voucher tìm trong accountvoucher = accid, vouchercode kết quả = voucher
-        // tính giá và product
-        // tính tổng đơn giá
-        // tạo đơn
-        
-        List<OrderItem> orderItems = new ArrayList<>();
+		order.setProvince(province);
+		order.setWard(ward);
 
-        for (OrderItemRequest itemReq : request.getItems()) {
+		// 4. Build OrderItems + tính tổng tiền
+		BigDecimal totalAmount = BigDecimal.ZERO;
 
-            Product product = productRepository.findById(itemReq.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-            
-            // so sánh số lượng của order so với số luọng product hiện có
-            if(product.getQuanlity()< itemReq.getQuantity()) {
-            	throw new RuntimeException("Sản phẩm không đủ hàng");
-            };
-            // xử lý khuyến mãi
-            BigDecimal price = product.getPrice();
-            	
-           
-            OrderItem item = new OrderItem();
-            item.setProduct(product);
-            item.setQuantity(itemReq.getQuantity());
-            item.setPrice(price);
-            item.setOrder(order);
-//            item.setPromotionId();
+		// kiểm tra số lượng item có lớn hơn số lượng còn lại không
+		// gủi gmail,
+		// xử lý voucher tìm trong accountvoucher = accid, vouchercode kết quả = voucher
+		// tính giá và product
+		// tính tổng đơn giá
+		// tạo đơn
 
-            orderItems.add(item);
+		List<OrderItem> orderItems = new ArrayList<>();
 
-            totalAmount = totalAmount.add(
-                    price.multiply(BigDecimal.valueOf(itemReq.getQuantity()))
-            );
-        }
+		for (OrderItemRequest itemReq : request.getItems()) {
 
-        order.setItems(orderItems);
-        order.setTotalAmount(totalAmount);
+			Product product = productRepository.findById(itemReq.getProductId())
+					.orElseThrow(() -> new RuntimeException("Product not found"));
 
-        
-        
-        // 5. Xử lý voucher
-//        BigDecimal discountAmount = BigDecimal.ZERO;
-//
-//        if (request.getVoucherCode() != null) {
-//
-//            Voucher voucher = voucherRepository
-//                    .findByVoucherCode(request.getVoucherCode())
-//                    .orElseThrow(() -> new RuntimeException("Voucher not found"));
-//
-//            validateVoucher(voucher, account, totalAmount);
-//
-//            discountAmount = calculateDiscount(voucher, totalAmount);
-//
-//            order.setVoucher(voucher);
-//            order.setVoucherCode(voucher.getVoucherCode());
-//
-//            // 🔥 tăng usage
-//            voucher.setCurrentUsage(voucher.getCurrentUsage() + 1);
-//
-//            // 🔥 mark AccountVoucher = USED
-//            AccountVoucher av = accountVoucherRepository
-//                    .findByAccountAndVoucher(account, voucher)
-//                    .orElseThrow(() -> new RuntimeException("Voucher not owned"));
-//
-//            av.setVoucherStatus(VoucherStatus.USED);
-//            av.setUsedAt(LocalDateTime.now());
-//        }
-//
-//        order.setDiscountAmount(discountAmount);
-//
-//        // 6. Ship fee (hardcode demo)
-//        BigDecimal shipFee = BigDecimal.valueOf(30000);
-//        order.setShipFee(shipFee);
-//
-//        // 7. Final price (nếu bạn muốn lưu)
-//        BigDecimal finalAmount = totalAmount
-//                .subtract(discountAmount)
-//                .add(shipFee);
+			// so sánh số lượng của order so với số luọng product hiện có
+			if (product.getQuanlity() < itemReq.getQuantity()) {
+				throw new RuntimeException("Sản phẩm không đủ hàng");
+			}
+			// tính giá sau khi áp dụng khuyến mãi
+			BigDecimal price = product.getPrice();
+			Promotion promotion = promotionRepository.findBestPromotion(product.getId(), price);
 
-        // 👉 bạn có thể thêm field finalAmount vào Order nếu cần
+			BigDecimal discountPrice = price; // mặc định
 
-        // 8. Save
-        return orderRepository.save(order);
+			if (promotion != null) {
+				if (promotion.getDiscountType() == DiscountType.PERCENT) {
+					discountPrice = price
+							.subtract(price.multiply(promotion.getDiscountValue()).divide(BigDecimal.valueOf(100)));
+				} else {
+					discountPrice = price.subtract(promotion.getDiscountValue());
+				}
+
+				// tránh âm
+				if (discountPrice.compareTo(BigDecimal.ZERO) < 0) {
+					discountPrice = BigDecimal.ZERO;
+				}
+			}
+
+			OrderItem item = new OrderItem();
+			item.setProduct(product);
+			item.setQuantity(itemReq.getQuantity());
+			item.setPrice(price);
+			item.setDiscountPrice(discountPrice);
+			item.setOrder(order);
+			if(discountPrice.compareTo(product.getPrice()) < 0) {			
+				item.setPromotionId(promotion.getId());
+			}
+			orderItems.add(item);
+			totalAmount = totalAmount.add(discountPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
+		}
+
+		order.setItems(orderItems);
+		order.setTotalAmount(totalAmount);
+
+		// 5. Xử lý voucher tạm thời bỏ qua chương trình tích điểm
+		 orderRepository.save(order);
+		
+		sendOrderConfirmationMail(order, account);
+		// 8. Save
+		return order;
+	}
+
+
+
+	private void sendOrderConfirmationMail(Order order, Account account) {
+
+	    String itemsHtml = order.getItems().stream()
+	            .map(item -> String.format("""
+	                    <tr>
+	                        <td>%s</td>
+	                        <td>%d</td>
+	                        <td>%s</td>
+	                        <td>%s</td>
+	                    </tr>
+	                    """,
+	                    item.getProduct().getModelName(),
+	                    item.getQuantity(),
+	                    formatPrice(item.getPrice()),
+	                    formatPrice(item.getDiscountPrice())
+	            ))
+	            .collect(Collectors.joining());
+
+	    String message = String.format("""
+	        <div style="font-family: Arial, sans-serif; line-height: 1.6; color:#333">
+	        
+	            <h2 style="color:#F42525;">Xác nhận đặt hàng thành công!</h2>
+	            
+	            <p>Cảm ơn bạn đã mua sắm tại <b>PiShop</b>.</p>
+	            
+	            <h3>Thông tin đơn hàng</h3>
+	            <p><b>Mã đơn hàng:</b> #%s</p>
+	            <p><b>Ngày đặt:</b> %s</p>
+	            
+	            <table border="1" cellpadding="8" cellspacing="0" width="100%%" style="border-collapse: collapse;">
+	                <thead style="background-color:#f5f5f5;">
+	                    <tr>
+	                        <th>Sản phẩm</th>
+	                        <th>Số lượng</th>
+	                        <th>Giá gốc</th>
+	                        <th>Giá sau KM</th>
+	                    </tr>
+	                </thead>
+	                <tbody>
+	                    %s
+	                </tbody>
+	            </table>
+	            
+	            <h3>💰 Thanh toán</h3>
+	            <p><b>Tổng tiền:</b> <span style="color:#F42525; font-size:18px;">%s</span></p>
+	            <p><b>Phương thức:</b> %s</p>
+	            
+	            <h3>📦 Thông tin nhận hàng</h3>
+	            <p><b>Người nhận:</b> %s</p>
+	            <p><b>SĐT:</b> %s</p>
+	            <p><b>Địa chỉ:</b> %s</p>
+	            
+	            <br>
+	            <p>Nếu bạn có bất kỳ câu hỏi nào, hãy liên hệ với chúng tôi.</p>
+	            
+	            <p style="margin-top:20px;">Trân trọng,<br><b>PiShop Team</b></p>
+	        </div>
+	        """,
+	            order.getId(),
+	            order.getCreateAt(), 
+	            itemsHtml,
+	            formatPrice(order.getTotalAmount()),
+	            order.getPaymentMethod(),
+	            order.getToName(),
+	            order.getToPhone(),
+	            order.getToAddress()
+	    );
+	    String subject = String.format("Xác nhận đơn hàng từ PiShop");
+	    
+	    try {
+	    	 emailService.sendHtmlMail(
+	 	            account.getEmail(),
+	 	            subject,
+	 	            message
+	 	    );
+		} catch (Exception e) {
+			throw new RuntimeException("Send mail failed", e);
+		}
+	   
+	}
+
+
+
+	private String formatPrice(BigDecimal price) {
+	    return NumberFormat
+	            .getInstance(new Locale("vi", "VN"))
+	            .format(price);
+	}
+
+	// 1. Lấy tất cả đơn hàng theo accountId (sort by date desc)
+    public List<Order> getOrdersByAccountId(Long accountId) {
+        return orderRepository.findByAccountIdOrderByCreateAtDesc(accountId);
     }
-    
-    private BigDecimal calculateDiscount(Voucher voucher, BigDecimal totalAmount) {
 
-        BigDecimal discount;
-
-        if (voucher.getDiscountType() == DiscountType.PERCENT) {
-            discount = totalAmount.multiply(voucher.getDiscountValue())
-                    .divide(BigDecimal.valueOf(100));
-        } else {
-            discount = voucher.getDiscountValue();
-        }
-
-        // cap max discount
-        if (voucher.getMaxDiscountAmount() != null &&
-            discount.compareTo(voucher.getMaxDiscountAmount()) > 0) {
-            discount = voucher.getMaxDiscountAmount();
-        }
-
-        return discount;
+    // 2. Lấy đơn hàng theo orderStatus
+    public List<Order> getOrdersByStatus(OrderStatus status) {
+        return orderRepository.findByOrderStatusOrderByCreateAtDesc(status);
     }
-    private BigDecimal bestProductPriceWithPromotion(Long id, BigDecimal price) {
-    	List<Promotion> promotions = promotionRepository
-    	        .findActivePromotionsByProductId(id);
 
-    	BigDecimal finalPrice = price;
-
-    	if (!promotions.isEmpty()) {
-
-    	    BigDecimal bestPrice = finalPrice;
-
-    	    for (Promotion promo : promotions) {
-
-    	        BigDecimal discountedPrice = finalPrice;
-
-    	        if (promo.getDiscountType() == DiscountType.PERCENT) {
-    	            discountedPrice = finalPrice.subtract(
-    	                    finalPrice.multiply(promo.getDiscountValue())
-    	                            .divide(BigDecimal.valueOf(100))
-    	            );
-    	        } else if (promo.getDiscountType() == DiscountType.FIXED_AMOUNT) {
-    	            discountedPrice = finalPrice.subtract(promo.getDiscountValue());
-    	        }
-
-    	        // tránh âm tiền
-    	        if (discountedPrice.compareTo(BigDecimal.ZERO) < 0) {
-    	            discountedPrice = BigDecimal.ZERO;
-    	        }
-
-    	        // lấy giá tốt nhất
-    	        if (discountedPrice.compareTo(bestPrice) < 0) {
-    	            bestPrice = discountedPrice;
-    	        }
-    	    }
-
-    	    finalPrice = bestPrice;
-    	   
-    	}
-    	
-    	return finalPrice;
+    // 3. Lấy tất cả đơn hàng chưa thanh toán của accountId (BANK, UNPAID)
+    public List<Order> getUnpaidBankOrdersByAccountId(Long accountId) {
+        return orderRepository.findByAccountIdAndPaymentMethodAndPayStatusOrderByCreateAtDesc(
+            accountId, "BANK", PayStatus.UNPAID);
     }
-    
-    
-    
-    //    private void SendtoMail() {
-//    	 //gửi email xác nhận
-//        String message = """
-//        <h1>Xác nhận đặt hàng thành công!</h1>
-//        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-//          <h4>Thông tin đặt hàng tại PiShop</h4>
-//          <h3><b>Đơn hàng: %s</b></h3>
-//          <p>Số vé: %d</p>
-//          <p>Ngày khởi hành: %s</p>
-//          <p><strong>Thành tiền: %sđ</strong></p>
-//          <br>
-//          <h4>Thông tin khách hàng</h4>
-//          <p>Họ tên: %s</p>
-//          <p>Số điện thoại: %s</p>
-//          <p>Địa chỉ: %s</p>
-//          <br>
-//          <i>Cảm ơn quý khách đã tin tưởng TravelGo!</i>
-//        </div>
-//        """.formatted(
-//                item.getTitleTour(),
-//                amountTicket,
-//                item.getDateTour(),
-//                NumberFormat.getInstance(new Locale("vi", "VN"))
-//                        .format(BigDecimal.valueOf(amountTicket).multiply(item.getPrice())),
-//                user.getFullname(),
-//                user.getPhoneNumber(),
-//                address
-//        );
-//        emailService.sendHtmlMail(account.getEmail(), "Xác nhận đặt tour du lịch", message);
-//    }
+
+    // 4. Yêu cầu hủy đơn hàng
+    public boolean requestCancelOrder(Long orderId, Long accountId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        if (!order.getAccount().getId().equals(accountId)) {
+            throw new RuntimeException("Bạn không có quyền hủy đơn hàng này");
+        }
+        if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Đơn hàng đã bị hủy trước đó");
+        }
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        return true;
+    }
 }

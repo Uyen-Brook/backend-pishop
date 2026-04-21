@@ -11,7 +11,9 @@ public class CategoryMapper {
 	        dto.setId(category.getId());
 	        dto.setName(category.getName());
 	        dto.setDescription(category.getDescription());
-	        
+	        dto.setImage(category.getImage());
+	        dto.setIcon(category.getIcon());
+	        dto.setNote(category.getNote()); 
 	        return dto;
 	  }
 }

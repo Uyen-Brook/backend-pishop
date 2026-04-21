@@ -81,10 +81,10 @@ public class ProfileService {
 	    if (req.getEmail() != null) {
 	        acc.setEmail(req.getEmail());
 	    }
-
-	    if (req.getPassword() != null) {
-	        acc.setPassword(passwordEncoder.encode(req.getPassword()));
-	    }
+//
+//	    if (req.getPassword() != null) {
+//	        acc.setPassword(passwordEncoder.encode(req.getPassword()));
+//	    }
 
 	    // ===== User =====
 	    User user = acc.getUser();
@@ -116,10 +116,6 @@ public class ProfileService {
 	    acc.setLastName(req.getLastName());
 	    acc.setEmail(req.getEmail());
 
-	    if (req.getPassword() != null) {
-	        acc.setPassword(passwordEncoder.encode(req.getPassword()));
-	    }
-
 	    return accountRepository.save(acc);
 	}
 	
@@ -135,6 +131,17 @@ public class ProfileService {
 	    return userRepository.save(user);
 	}
 	
+	public void changePassword(Long accountId,String oldPassword, String newPassword) {
+	    Account acc = accountRepository.findById(accountId).orElseThrow();
+	    if (!passwordEncoder.matches(oldPassword, acc.getPassword())) {
+	        throw new RuntimeException("Old password is incorrect");
+	    }else if (passwordEncoder.matches(newPassword, acc.getPassword())) {
+	    		throw new RuntimeException("New password must be different from old password");
+	    }else {
+			acc.setPassword(passwordEncoder.encode(newPassword));
+		}
+	    accountRepository.save(acc);
+	}
 	// 4. update avatar
 	public String uploadAvatar(Long accountId, MultipartFile file) {
 	    // 1. Lấy account
@@ -161,18 +168,19 @@ public class ProfileService {
 	}
 	
 	// 5. update address
-	public Address updateAddress(Long id, AddressRequest req) {
+	public AddressResponse updateAddress(Long id, AddressRequest req) {
 	    Address addr = addressRepository.findById(id).orElseThrow();
 
 	    addr.setFullName(req.getFullName());
 	    addr.setPhone(req.getPhone());
 	    addr.setSpecificAddress(req.getSpecificAddress());
 
-	    return addressRepository.save(addr);
+	    addressRepository.save(addr);
+	    return AddressMapper.toResponse(addr);
 	}
 	
 	// 6. add Address
-	public Address addAddress(Long accountId, AddressRequest req) {
+	public AddressResponse addAddress(Long accountId, AddressRequest req) {
 	    Account acc = accountRepository.findById(accountId).orElseThrow();
 
 	    Province province = ProvinceRepository.findById(req.getProvinceCode()).orElseThrow();
@@ -185,8 +193,8 @@ public class ProfileService {
 	    addr.setProvince(province);
 	    addr.setWard(ward);
 	    addr.setAccount(acc);
-
-	    return addressRepository.save(addr);
+	     
+	    return AddressMapper.toResponse(addressRepository.save(addr));
 	}
 	//7. set address default
 	public void setDefault(Long addressId, Long accountId) {

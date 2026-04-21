@@ -10,17 +10,19 @@ import java.util.Set;
 
 import com.backend.pishop.enums.ProductStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "products")
 @Getter
 @Setter
+@Where(clause = "is_deleted = false")
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+   
     @Column(name = "model_name", nullable = false)
     private String modelName;
     
@@ -31,10 +33,16 @@ public class Product {
 
     @Column(columnDefinition = "TEXT")// giống file html hoặc text để lưu mô tả chi tiết sản phẩm, có thể bao gồm cả hình ảnh, video trình bày về sản phẩm...
     private String description;
+    
+    @Column(name = "import_price", precision = 12, scale = 2)
+    private BigDecimal importPrice;
+    
+    @Column(name = "tax_vat", precision = 5, scale = 2)
+    private BigDecimal taxVat; 
 
     @Column(name = "price", precision = 12, scale = 2)
     private BigDecimal price;
-
+    
     @Column(name = "model_number")
     private String modelNumber;
 
@@ -44,10 +52,12 @@ public class Product {
     @Column(name = "quanlity", nullable = false)
     private Integer quanlity;
     
-    
     @Enumerated(EnumType.STRING)
     @Column(name = "product_status")
     private ProductStatus productStatus;
+    
+    @Column(name = "is_deleted")
+    private Boolean deleted = false;
 
     @Column(name = "create_at")
     private LocalDateTime createAt;

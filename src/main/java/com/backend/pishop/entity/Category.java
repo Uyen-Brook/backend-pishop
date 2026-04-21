@@ -23,6 +23,12 @@ public class Category {
     private String name;
 
     private String description;
+    
+    private String icon;
+    
+    private String image;
+    
+    private String note;
 
     // 1 Category có nhiều Product
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

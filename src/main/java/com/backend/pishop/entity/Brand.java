@@ -23,7 +23,9 @@ public class Brand {
     private String name;
 
     private String image;
+    
     private String website;
+    private String note;
 
     // 1 Brand có nhiều Product
     @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

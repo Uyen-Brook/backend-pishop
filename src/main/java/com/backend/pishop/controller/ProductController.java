@@ -15,7 +15,7 @@ import com.backend.pishop.entity.Brand;
 import com.backend.pishop.entity.Category;
 import com.backend.pishop.entity.Product;
 import com.backend.pishop.entity.Supplier;
-import com.backend.pishop.response.BrandRespone;
+import com.backend.pishop.response.BrandResponse;
 import com.backend.pishop.response.CategoryResponse;
 import com.backend.pishop.response.ProductResponse;
 import com.backend.pishop.response.ProductSumaryResponse;
@@ -37,6 +37,7 @@ public class ProductController {
     public ResponseEntity<List<ProductSumaryResponse>> getAll() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
+	
     @GetMapping("/product/brand/{brandId}")
     public ResponseEntity<List<ProductSumaryResponse>> getByBrand(@PathVariable Long brandId) {
         return ResponseEntity.ok(productService.getProductsByBrand(brandId));
@@ -70,13 +71,13 @@ public class ProductController {
    
     
 	  @GetMapping("/brands")
-	  public List<BrandRespone> getAllBrands() {
+	  public List<BrandResponse> getAllBrands() {
 	      return productService.getAllBrands();
 	  }
 	 
 	  
 	  @GetMapping("/brands/{id}")
-	  public BrandRespone getBrandDetail(@PathVariable Long id) {
+	  public BrandResponse getBrandDetail(@PathVariable Long id) {
 	      return productService.getBrandDetailById(id);
 	  }
 	  

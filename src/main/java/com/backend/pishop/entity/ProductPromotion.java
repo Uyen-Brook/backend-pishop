@@ -1,12 +1,17 @@
 package com.backend.pishop.entity;
 
-import com.backend.pishop.enums.PromotionTargetType;
-
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "product_promotions")
+@Table(
+	    name = "product_promotions",
+	    indexes = {
+	        @Index(name = "idx_pp_product", columnList = "product_id"),
+	        @Index(name = "idx_pp_promotion", columnList = "promotion_id"),
+	        @Index(name = "idx_pp_product_promotion", columnList = "product_id,promotion_id")
+	    }
+	)
 @Getter
 @Setter
 @NoArgsConstructor
