@@ -12,6 +12,9 @@ public class SupplierMapper {
 	        dto.setId(supplier.getId());
 	        dto.setName(supplier.getName());
 	        dto.setLogo(supplier.getLogo());
+	        dto.setAddress(supplier.getAddress());
+	        dto.setPhone(supplier.getPhone());
+	        dto.setAddress(supplier.getTaxcode());
 	        return dto;
 	  }
 	 

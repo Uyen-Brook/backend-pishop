@@ -29,5 +29,5 @@ public class CartItemResponse {
     private DiscountType discountType;
     private LocalDate startDate;
     private LocalDate endDate;
-    private boolean selected = false;
+    private boolean selected = true;
 }

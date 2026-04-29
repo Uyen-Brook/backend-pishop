@@ -7,6 +7,7 @@ import com.backend.pishop.service.OrderService;
 import com.backend.pishop.entity.Order;
 import com.backend.pishop.enums.OrderStatus;
 import com.backend.pishop.request.OrderRequest;
+import com.backend.pishop.response.OrderResponse;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -20,25 +21,25 @@ public class OrderController {
     private final OrderService orderService;
     
     @PostMapping("/create")
-    public Order createOrder(@RequestBody OrderRequest orderRequest) {
+    public OrderResponse createOrder(@RequestBody OrderRequest orderRequest) {
 		return orderService.createOrder(orderRequest);
 	}
 
     // 1. Lấy tất cả đơn hàng theo accountId (sort by date desc)
     @GetMapping("/by-account/{accountId}")
-    public List<Order> getOrdersByAccount(@PathVariable Long accountId) {
+    public List<OrderResponse> getOrdersByAccount(@PathVariable Long accountId) {
         return orderService.getOrdersByAccountId(accountId);
     }
 
     // 2. Lấy đơn hàng theo orderStatus
     @GetMapping("/by-status")
-    public List<Order> getOrdersByStatus(@RequestParam OrderStatus status) {
+    public List<OrderResponse> getOrdersByStatus(@RequestParam OrderStatus status) {
         return orderService.getOrdersByStatus(status);
     }
  
     // 3. Lấy tất cả đơn hàng chưa thanh toán của accountId (BANK, UNPAID)
     @GetMapping("/unpaid-bank/{accountId}")
-    public List<Order> getUnpaidBankOrders(@PathVariable Long accountId) {
+    public List<OrderResponse> getUnpaidBankOrders(@PathVariable Long accountId) {
         return orderService.getUnpaidBankOrdersByAccountId(accountId);
     }
 

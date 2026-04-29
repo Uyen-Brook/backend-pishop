@@ -21,6 +21,7 @@ import com.backend.pishop.repository.ProvinceRepository;
 import com.backend.pishop.repository.UserRepository;
 import com.backend.pishop.repository.WardRepository;
 import com.backend.pishop.request.AddressRequest;
+import com.backend.pishop.request.ChangePasswordRequest;
 import com.backend.pishop.request.RegisterRequest;
 import com.backend.pishop.request.UpdateAccountRequest;
 import com.backend.pishop.request.UpdateProfileRequest;
@@ -40,181 +41,215 @@ public class ProfileService {
 	private final WardRepository WardRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final CloudinaryService coudinaryService;
-	
+
 	// 1. register
 	public Account register(RegisterRequest req) {
-	    Account acc = new Account();
-	    acc.setFirstName(req.getFirstName());
-	    acc.setLastName(req.getLastName());
-	    acc.setEmail(req.getEmail());
-	    acc.setPassword(passwordEncoder.encode(req.getPassword()));
-	    acc.setActive(true);
-	    acc.setCreateAt(LocalDateTime.now());
+		Account acc = new Account();
+		acc.setFirstName(req.getFirstName());
+		acc.setLastName(req.getLastName());
+		acc.setEmail(req.getEmail());
+		acc.setPassword(passwordEncoder.encode(req.getPassword()));
+		acc.setActive(true);
+		acc.setCreateAt(LocalDateTime.now());
 
-	    // tạo User
-	    User user = new User();
-	    user.setAccount(acc);
+		// tạo User
+		User user = new User();
+		user.setAccount(acc);
 
-	    acc.setUser(user);
+		acc.setUser(user);
 
-	    return accountRepository.save(acc);
+		return accountRepository.save(acc);
 	}
-	//get profile infor by account id
+
+	// get profile infor by account id
 	public ProfileResponse getProfile(Long accountId) {
-	    ProfileResponse acc = accountRepository.findById(accountId)
-	    		.map(ProfileMapper::toResponse).orElseThrow();
-	    return acc;
+		ProfileResponse acc = accountRepository.findById(accountId).map(ProfileMapper::toResponse).orElseThrow();
+		return acc;
 	}
-	//2 . update profile
+
+	// 2 . update profile
 	public Account updateProfile(Long accountId, UpdateProfileRequest req) {
-	    Account acc = accountRepository.findById(accountId).orElseThrow();
+		Account acc = accountRepository.findById(accountId).orElseThrow();
 
-	    // ===== Account =====
-	    if (req.getFirstName() != null) {
-	        acc.setFirstName(req.getFirstName());
-	    }
+		// ===== Account =====
+		if (req.getFirstName() != null) {
+			acc.setFirstName(req.getFirstName());
+		}
 
-	    if (req.getLastName() != null) {
-	        acc.setLastName(req.getLastName());
-	    }
+		if (req.getLastName() != null) {
+			acc.setLastName(req.getLastName());
+		}
 
-	    if (req.getEmail() != null) {
-	        acc.setEmail(req.getEmail());
-	    }
+		if (req.getEmail() != null) {
+			acc.setEmail(req.getEmail());
+		}
 //
 //	    if (req.getPassword() != null) {
 //	        acc.setPassword(passwordEncoder.encode(req.getPassword()));
 //	    }
 
-	    // ===== User =====
-	    User user = acc.getUser();
+		// ===== User =====
+		User user = acc.getUser();
 
-	    if (user == null) {
-	        user = new User();
-	        user.setAccount(acc);
-	        acc.setUser(user);
-	    }
+		if (user == null) {
+			user = new User();
+			user.setAccount(acc);
+			acc.setUser(user);
+		}
 
-	    if (req.getDob() != null) {
-	        user.setDateOfBirth(req.getDob());
-	    }
+		if (req.getDob() != null) {
+			user.setDateOfBirth(req.getDob());
+		}
 
-	    if (req.getPhone() != null) {
-	        user.setPhoneNumber(req.getPhone());
-	    }
+		if (req.getPhone() != null) {
+			user.setPhoneNumber(req.getPhone());
+		}
 
-	    user.setGender(req.isGender());
+		user.setGender(req.isGender());
 
-	    // chỉ cần save account (cascade sẽ save user)
-	    return accountRepository.save(acc);
+		// chỉ cần save account (cascade sẽ save user)
+		return accountRepository.save(acc);
 	}
-	
+
 	public Account updateAccount(Long id, UpdateAccountRequest req) {
-	    Account acc = accountRepository.findById(id).orElseThrow();
+		Account acc = accountRepository.findById(id).orElseThrow();
 
-	    acc.setFirstName(req.getFirstName());
-	    acc.setLastName(req.getLastName());
-	    acc.setEmail(req.getEmail());
+		acc.setFirstName(req.getFirstName());
+		acc.setLastName(req.getLastName());
+		acc.setEmail(req.getEmail());
 
-	    return accountRepository.save(acc);
+		return accountRepository.save(acc);
 	}
-	
+
 	// 3. update user
 	public User updateUser(Long accountId, UpdateUserRequest req) {
-	    Account acc = accountRepository.findById(accountId).orElseThrow();
+		Account acc = accountRepository.findById(accountId).orElseThrow();
 
-	    User user = acc.getUser();
-	    user.setDateOfBirth(req.getDob());
-	    user.setPhoneNumber(req.getPhone());
-	    user.setGender(req.isGender());
+		User user = acc.getUser();
+		user.setDateOfBirth(req.getDob());
+		user.setPhoneNumber(req.getPhone());
+		user.setGender(req.isGender());
 
-	    return userRepository.save(user);
+		return userRepository.save(user);
 	}
-	
-	public void changePassword(Long accountId,String oldPassword, String newPassword) {
-	    Account acc = accountRepository.findById(accountId).orElseThrow();
-	    if (!passwordEncoder.matches(oldPassword, acc.getPassword())) {
-	        throw new RuntimeException("Old password is incorrect");
-	    }else if (passwordEncoder.matches(newPassword, acc.getPassword())) {
-	    		throw new RuntimeException("New password must be different from old password");
-	    }else {
+
+	public void changePassword(Long accountId, String oldPassword, String newPassword) {
+		Account acc = accountRepository.findById(accountId).orElseThrow();
+		if (!passwordEncoder.matches(oldPassword, acc.getPassword())) {
+			throw new RuntimeException("Old password is incorrect");
+		} else if (passwordEncoder.matches(newPassword, acc.getPassword())) {
+			throw new RuntimeException("New password must be different from old password");
+		} else {
 			acc.setPassword(passwordEncoder.encode(newPassword));
 		}
-	    accountRepository.save(acc);
+		accountRepository.save(acc);
 	}
+
 	// 4. update avatar
 	public String uploadAvatar(Long accountId, MultipartFile file) {
-	    // 1. Lấy account
-	    Account account = accountRepository.findById(accountId)
-	            .orElseThrow(() -> new RuntimeException("Account not found"));
+		// 1. Lấy account
+		Account account = accountRepository.findById(accountId)
+				.orElseThrow(() -> new RuntimeException("Account not found"));
 
-	    // 2. Upload ảnh lên Cloudinary
-	    String imageUrl = coudinaryService.uploadImage(file, ResourceType.AVATAR);
-		
-	    // 3. Lưu URL vào account
-	    account.setImage(imageUrl);
-	    accountRepository.save(account);
+		// 2. Upload ảnh lên Cloudinary
+		String imageUrl = coudinaryService.uploadImage(file, ResourceType.AVATAR);
 
-	    // 4. Trả về URL
-	    return imageUrl;
+		// 3. Lưu URL vào account
+		account.setImage(imageUrl);
+		accountRepository.save(account);
+
+		// 4. Trả về URL
+		return imageUrl;
 	}
-	
-	//get all address by account id
+
+	// get all address by account id
 	public List<AddressResponse> getAllByAccount(Long accountId) {
-	    return addressRepository.findByAccountId(accountId)
-	    		.stream()
-	    		.map(AddressMapper::toResponse)
-	    		.toList();
+		return addressRepository.findByAccountId(accountId).stream().map(AddressMapper::toResponse).toList();
 	}
-	
+
 	// 5. update address
 	public AddressResponse updateAddress(Long id, AddressRequest req) {
-	    Address addr = addressRepository.findById(id).orElseThrow();
+		Address addr = addressRepository.findById(id).orElseThrow();
 
-	    addr.setFullName(req.getFullName());
-	    addr.setPhone(req.getPhone());
-	    addr.setSpecificAddress(req.getSpecificAddress());
+		addr.setFullName(req.getFullName());
+		addr.setPhone(req.getPhone());
+		addr.setSpecificAddress(req.getSpecificAddress());
 
-	    addressRepository.save(addr);
-	    return AddressMapper.toResponse(addr);
+		addressRepository.save(addr);
+		return AddressMapper.toResponse(addr);
 	}
-	
+
 	// 6. add Address
 	public AddressResponse addAddress(Long accountId, AddressRequest req) {
-	    Account acc = accountRepository.findById(accountId).orElseThrow();
+		Account acc = accountRepository.findById(accountId).orElseThrow();
 
-	    Province province = ProvinceRepository.findById(req.getProvinceCode()).orElseThrow();
-	    Ward ward = WardRepository.findById(req.getWardCode()).orElseThrow();
+		Province province = ProvinceRepository.findById(req.getProvinceCode()).orElseThrow();
+		Ward ward = WardRepository.findById(req.getWardCode()).orElseThrow();
 
-	    Address addr = new Address();
-	    addr.setFullName(req.getFullName());
-	    addr.setPhone(req.getPhone());
-	    addr.setSpecificAddress(req.getSpecificAddress());
-	    addr.setProvince(province);
-	    addr.setWard(ward);
-	    addr.setAccount(acc);
-	     
-	    return AddressMapper.toResponse(addressRepository.save(addr));
+		Address addr = new Address();
+		addr.setFullName(req.getFullName());
+		addr.setPhone(req.getPhone());
+		addr.setSpecificAddress(req.getSpecificAddress());
+		addr.setProvince(province);
+		addr.setWard(ward);
+		addr.setAccount(acc);
+		addressRepository.save(addr);
+		if(req.isDefault()) {
+			setDefault(addr.getId(), accountId);
+		}
+		
+		return AddressMapper.toResponse(addr);
 	}
-	//7. set address default
+
+	// 7. set address default
 	public void setDefault(Long addressId, Long accountId) {
-	    List<Address> list = addressRepository.findByAccountId(accountId);
+		List<Address> list = addressRepository.findByAccountId(accountId);
 
-	    for (Address a : list) {
-	        a.setDefault(false);
-	    }
+		for (Address a : list) {
+			a.setDefault(false);
+		}
 
-	    Address selected = addressRepository.findById(addressId).orElseThrow();
-	    selected.setDefault(true);
+		Address selected = addressRepository.findById(addressId).orElseThrow();
+		selected.setDefault(true);
+		
+		addressRepository.saveAll(list);
 	}
-	
+
 	// 8. delete address
 	public void deleteAddress(Long id) {
-	    addressRepository.deleteById(id);
+		addressRepository.deleteById(id);
 	}
-	
+
 	// 9. delete multile address
 	public void deleteMultiple(List<Long> ids) {
-	    addressRepository.deleteAllById(ids);
+		addressRepository.deleteAllById(ids);
+	}
+
+	// change password:
+	public void changePassword(Long id, ChangePasswordRequest req) {
+
+		// tìm account
+		Account account = accountRepository.findById(id).orElseThrow();
+
+		// check mật khẩu cũ
+		boolean isMatch = passwordEncoder.matches(req.getOldPassword(), account.getPassword());
+
+		if (!isMatch) {
+			throw new RuntimeException("Mật khẩu hiện tại không đúng");
+		}
+
+		// validate mật khẩu mới
+		if (req.getNewPassword() == null || req.getNewPassword().length() < 6) {
+
+			throw new RuntimeException("Mật khẩu mới phải từ 6 ký tự");
+		}
+
+		// encode password mới
+		String newPasswordEncoded = passwordEncoder.encode(req.getNewPassword());
+
+		// update
+		account.setPassword(newPasswordEncoded);
+
+		accountRepository.save(account);
 	}
 }

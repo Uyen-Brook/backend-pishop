@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +24,12 @@ import com.backend.pishop.repository.PromotionRepository;
 import com.backend.pishop.repository.SupplierRepository;
 import com.backend.pishop.response.BrandResponse;
 import com.backend.pishop.response.CategoryResponse;
+import com.backend.pishop.response.ProductResponse;
 import com.backend.pishop.response.ProductSumaryResponse;
 import com.backend.pishop.response.SupplierDetailResponse;
 import com.backend.pishop.response.SupplierResponse;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -50,8 +54,6 @@ public class ProductService {
                 .toList();
     }
     
-
-
     // ============================
     // LỌC THEO BRAND
     // ============================
@@ -163,5 +165,13 @@ public class ProductService {
 				.map(SupplierMapper::toResponseDetail)
 				.orElseThrow();
 	}
+
+
+    public ProductResponse findByProductId(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        return ProductMapper.toResponse(product);
+    }
 
 }

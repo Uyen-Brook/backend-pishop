@@ -54,7 +54,7 @@ public class Product {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "product_status")
-    private ProductStatus productStatus;
+    private ProductStatus productStatus = ProductStatus.NEW;
     
     @Column(name = "is_deleted")
     private Boolean deleted = false;

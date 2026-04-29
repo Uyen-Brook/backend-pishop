@@ -3,6 +3,8 @@ package com.backend.pishop.request;
 import lombok.Data;
 import java.math.BigDecimal;
 
+import com.backend.pishop.enums.ProductStatus;
+
 @Data
 public class ProductUpdateRequest {
     private String modelName;
@@ -15,7 +17,7 @@ public class ProductUpdateRequest {
     private String modelNumber;
     private String listImage; // JSON string
     private Integer quanlity;
-    private String productStatus;
+    private ProductStatus productStatus;
     private Long brandId;
     private Long supplierId;
     private Long categoryId;

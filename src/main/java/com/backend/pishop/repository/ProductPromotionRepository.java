@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.pishop.entity.ProductPromotion;
 
@@ -14,4 +16,9 @@ public interface ProductPromotionRepository extends JpaRepository<ProductPromoti
 	@Query("select pp from ProductPromotion pp join fetch pp.promotion p where pp.product.id = :productId " +
 	       "and p.isActive = true and p.startDate <= :today and p.endDate >= :today")
 	Optional<ProductPromotion> findActiveByProductId(@Param("productId") Long productId, @Param("today") LocalDate today);
+
+	@Modifying
+	@Transactional
+	@Query("delete from ProductPromotion pp where pp.promotion.id = :promotionId")
+	void deleteByPromotionId(@Param("promotionId") Long promotionId);
 }

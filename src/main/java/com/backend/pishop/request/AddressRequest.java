@@ -9,4 +9,5 @@ public class AddressRequest {
     private String specificAddress;
     private String provinceCode;
     private String wardCode;
+    private boolean isDefault;
 }

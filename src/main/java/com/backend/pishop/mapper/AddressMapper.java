@@ -12,6 +12,8 @@ public class AddressMapper {
 	        dto.setFullName(address.getFullName());
 	        dto.setPhone(address.getPhone());
 	        dto.setSpecificAddress(address.getSpecificAddress());
+	        dto.setWardCode(address.getWard().getCodeName());
+	        dto.setProvinceCode(address.getProvince().getCode());
 	        dto.setProvinceName(address.getProvince().getFullName());
 	        dto.setWardName(address.getWard().getFullName());
 	        dto.setDefault(address.isDefault());

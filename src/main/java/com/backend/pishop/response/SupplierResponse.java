@@ -7,4 +7,7 @@ public class SupplierResponse {
 	private Long id;
 	private String name;
 	private String logo;
+    private String taxcode;
+	private String phone;
+	private String address;
 }

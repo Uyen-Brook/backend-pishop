@@ -29,7 +29,7 @@ public class Account {
 	String firstName;
     
     @Column(name = "last_name")
-	String LastName;
+	String lastName;
     
     @Column(nullable = false, unique = true)
     private String email;

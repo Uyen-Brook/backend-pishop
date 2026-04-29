@@ -14,7 +14,7 @@ import com.backend.pishop.service.admin.ProductAdminService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/admin/products")
+@RequestMapping("/api/admin/products")
 @RequiredArgsConstructor
 public class ProductAdminController {
     @Autowired

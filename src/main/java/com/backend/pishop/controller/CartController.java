@@ -31,11 +31,11 @@ public class CartController {
     }
 
     // Cập nhật số lượng sản phẩm trong giỏ
-    @PutMapping("/{accountId}/update")
+    @PutMapping("/{accountId}/update/{productId}/{quantity}")
     public ResponseEntity<String> updateQuantity(
-            @PathVariable Long accountId,
-            @RequestParam Long productId,
-            @RequestParam Integer quantity) {
+    		@PathVariable("accountId") Long accountId,
+            @PathVariable("productId") Long productId,
+            @PathVariable("quantity") Integer quantity){
         cartService.updateCartItem(accountId, productId, quantity);
         return ResponseEntity.ok("Quantity updated successfully");
     }

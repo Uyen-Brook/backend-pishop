@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.pishop.request.AddressRequest;
+import com.backend.pishop.request.ChangePasswordRequest;
 import com.backend.pishop.request.UpdateAccountRequest;
 import com.backend.pishop.request.UpdateProfileRequest;
 import com.backend.pishop.request.UpdateUserRequest;
@@ -34,6 +35,7 @@ public class ProfileController {
 	public ResponseEntity<?> getProfile(@PathVariable Long accountId) {
 	    return ResponseEntity.ok(profileService.getProfile(accountId));
 	}
+	
 	// update profile
 	@PutMapping("/infor/update/{id}")
 	public ResponseEntity<?> updateProfile(@PathVariable Long id,
@@ -88,5 +90,16 @@ public class ProfileController {
     public ResponseEntity<?> deleteMulti(@RequestBody List<Long> ids) {
     	profileService.deleteMultiple(ids);
         return ResponseEntity.ok("deleted");
+    }
+    
+    @PutMapping("/password/update/{id}")
+    public ResponseEntity<?> changePassword(
+            @PathVariable Long id,
+            @RequestBody ChangePasswordRequest req
+    ) {
+
+        profileService.changePassword(id, req);
+
+        return ResponseEntity.ok("Đổi mật khẩu thành công");
     }
 }
