@@ -2,38 +2,115 @@ package com.backend.pishop.controller.admin;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.backend.pishop.enums.OrderStatus;
+import com.backend.pishop.request.OrderRequest;
+import com.backend.pishop.response.OrderResponse;
+import com.backend.pishop.service.admin.AdminOrderService;
+
 import lombok.RequiredArgsConstructor;
 
-import com.backend.pishop.service.admin.AdminOrderService;
-import com.backend.pishop.entity.Order;
-import com.backend.pishop.enums.OrderStatus;
-import com.backend.pishop.config.APIResponse;
-
 @RestController
-@RequestMapping("/admin/orders")
+@RequestMapping("/api/admin/orders")
 @RequiredArgsConstructor
 public class AdminOrderController {
 
-    private final AdminOrderService orderService;
+    private final AdminOrderService adminOrderService;
 
+    // =========================
+    // GET ALL
+    // =========================
     @GetMapping
-    public APIResponse<List<Order>> listAll() {
-        return APIResponse.success(orderService.listAll());
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        return ResponseEntity.ok(adminOrderService.getAllOrders());
     }
 
-    @GetMapping("/by-status")
-    public APIResponse<List<Order>> byStatus(@RequestParam OrderStatus status) {
-        return APIResponse.success(orderService.listByStatus(status));
+    // =========================
+    // GET DETAIL
+    // =========================
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponse> getOrderDetail(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(adminOrderService.getOrderDetail(id));
     }
 
+    // =========================
+    // SEARCH
+    // =========================
+    @GetMapping("/search")
+    public ResponseEntity<List<OrderResponse>> searchOrders(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) Long accountId
+    ) {
+        return ResponseEntity.ok(
+                adminOrderService.searchOrders(
+                        keyword,
+                        status,
+                        accountId
+                )
+        );
+    }
+
+    // =========================
+    // CREATE ORDER
+    // =========================
+    @PostMapping
+    public ResponseEntity<OrderResponse> createOrder(
+            @RequestBody OrderRequest request
+    ) {
+        return ResponseEntity.ok(adminOrderService.createOrder(request));
+    }
+
+    // =========================
+    // UPDATE ORDER
+    // =========================
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderResponse> updateOrder(
+            @PathVariable Long id,
+            @RequestBody OrderRequest request
+    ) {
+        return ResponseEntity.ok(
+                adminOrderService.updateOrder(id, request)
+        );
+    }
+
+    // =========================
+    // CHANGE STATUS
+    // =========================
     @PatchMapping("/{id}/status")
-    public APIResponse<Order> updateStatus(@PathVariable Long id, @RequestParam OrderStatus status) {
-        return APIResponse.success(orderService.updateStatus(id, status));
+    public ResponseEntity<OrderResponse> changeStatus(
+            @PathVariable Long id,
+            @RequestParam OrderStatus status
+    ) {
+        return ResponseEntity.ok(
+                adminOrderService.updateStatus(id, status)
+        );
     }
 
-    @PostMapping("/{id}/cancel")
-    public APIResponse<Order> cancel(@PathVariable Long id) {
-        return APIResponse.success(orderService.cancelOrder(id));
+    // =========================
+    // CANCEL ORDER
+    // =========================
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<OrderResponse> cancelOrder(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                adminOrderService.cancelOrder(id)
+        );
+    }
+
+    // =========================
+    // DELETE ORDER
+    // =========================
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(
+            @PathVariable Long id
+    ) {
+        adminOrderService.deleteOrder(id);
+        return ResponseEntity.ok().build();
     }
 }

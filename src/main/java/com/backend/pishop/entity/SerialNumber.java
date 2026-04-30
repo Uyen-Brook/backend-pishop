@@ -24,17 +24,17 @@ public class SerialNumber {
     @Enumerated(EnumType.STRING)
     private SerialStatus status;
 
-    @Column(name = "import_date")
-    private LocalDateTime importDate;
+//    @Column(name = "import_date")
+//    private LocalDateTime importDate;
 
-    @Column(name = "import_price", precision = 12, scale = 2)
-    private BigDecimal importPrice;
+//    @Column(name = "import_price", precision = 12, scale = 2)
+//    private BigDecimal importPrice;
 
-    @Column(name = "warehouse_location")
-    private String warehouseLocation;
+//    @Column(name = "warehouse_location")
+//    private String warehouseLocation;
 
-    @Column(name = "selling_price", precision = 12, scale = 2)
-    private BigDecimal sellingPrice;
+//    @Column(name = "selling_price", precision = 12, scale = 2)
+//    private BigDecimal sellingPrice;
 
     @Column(name = "sold_date")
     private LocalDateTime soldDate;
@@ -52,7 +52,6 @@ public class SerialNumber {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
-
    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_item_id")

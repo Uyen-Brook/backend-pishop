@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.backend.pishop.config.APIResponse;
 import com.backend.pishop.request.SupplierRequest;
 import com.backend.pishop.response.SupplierResponse;
 import com.backend.pishop.service.SupplierService;
@@ -21,7 +20,7 @@ import com.backend.pishop.service.SupplierService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/admin/suppliers")
+@RequestMapping("api/admin/suppliers")
 @RequiredArgsConstructor
 public class SupplierAdminController {
 
@@ -29,57 +28,47 @@ public class SupplierAdminController {
 
     // CREATE
     @PostMapping
-    public APIResponse<SupplierResponse> create(
+    public SupplierResponse create(
             @ModelAttribute SupplierRequest request,
             @RequestParam(required = false) MultipartFile logo
     ) {
-        return APIResponse.<SupplierResponse>builder()
-                .result(supplierService.create(request, logo))
-                .build();
+        return supplierService.create(request, logo);
     }
 
     // UPDATE (PATCH)
     @PatchMapping("/{id}")
-    public APIResponse<SupplierResponse> update(
+    public SupplierResponse update(
             @PathVariable Long id,
             @ModelAttribute SupplierRequest request,
             @RequestParam(required = false) MultipartFile logo
     ) {
-        return APIResponse.<SupplierResponse>builder()
-                .result(supplierService.update(id, request, logo))
-                .build();
+        return supplierService.update(id, request, logo);
     }
 
     // DELETE
     @DeleteMapping("/{id}")
-    public APIResponse<Void> delete(@PathVariable Long id) {
+    public String delete(@PathVariable Long id) {
         supplierService.delete(id);
-        return APIResponse.<Void>builder().message("Deleted").build();
+        return "Deleted";
     }
 
     // GET ALL
     @GetMapping
-    public APIResponse<List<SupplierResponse>> getAll() {
-        return APIResponse.<List<SupplierResponse>>builder()
-                .result(supplierService.getAll())
-                .build();
+    public List<SupplierResponse> getAll() {
+        return supplierService.getAll();
     }
 
     // SEARCH
     @GetMapping("/search")
-    public APIResponse<List<SupplierResponse>> search(
+    public List<SupplierResponse> search(
             @RequestParam(required = false) String keyword
     ) {
-        return APIResponse.<List<SupplierResponse>>builder()
-                .result(supplierService.search(keyword))
-                .build();
+        return supplierService.search(keyword);
     }
 
     // GET BY ID
     @GetMapping("/{id}")
-    public APIResponse<SupplierResponse> getById(@PathVariable Long id) {
-        return APIResponse.<SupplierResponse>builder()
-                .result(supplierService.getById(id))
-                .build();
+    public SupplierResponse getById(@PathVariable Long id) {
+        return supplierService.getById(id);
     }
 }

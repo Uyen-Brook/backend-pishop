@@ -13,6 +13,23 @@ import com.backend.pishop.enums.OrderStatus;
 import com.backend.pishop.enums.PayStatus;
 
 public interface OrderRepository extends JpaRepository<Order, Long>{
+	 @Query("""
+		        SELECT o
+		        FROM Order o
+		        WHERE
+		            (:keyword IS NULL
+		                OR LOWER(o.toName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+		                OR LOWER(o.toPhone) LIKE LOWER(CONCAT('%', :keyword, '%'))
+		                OR LOWER(o.trackingNumber) LIKE LOWER(CONCAT('%', :keyword, '%')))
+		        AND (:status IS NULL OR o.orderStatus = :status)
+		        AND (:accountId IS NULL OR o.account.id = :accountId)
+		        ORDER BY o.createAt DESC
+		    """)
+		    List<Order> searchOrders(
+		            @Param("keyword") String keyword,
+		            @Param("status") OrderStatus status,
+		            @Param("accountId") Long accountId
+		    );
     List<Order> findByAccountIdOrderByCreateAtDesc(Long accountId);
     List<Order> findByOrderStatusOrderByCreateAtDesc(OrderStatus status);
     List<Order> findByAccountIdAndPaymentMethodAndPayStatusOrderByCreateAtDesc(Long accountId, String paymentMethod, PayStatus payStatus);

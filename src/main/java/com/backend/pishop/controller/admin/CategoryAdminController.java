@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.backend.pishop.config.APIResponse;
 import com.backend.pishop.request.CategoryRequest;
 import com.backend.pishop.response.CategoryResponse;
 import com.backend.pishop.service.CategoryService;
@@ -29,57 +28,47 @@ public class CategoryAdminController {
 
     // CREATE
     @PostMapping
-    public APIResponse<CategoryResponse> create(
+    public CategoryResponse create(
             @ModelAttribute CategoryRequest request,
             @RequestParam(required = false) MultipartFile image
     ) {
-        return APIResponse.<CategoryResponse>builder()
-                .result(categoryService.create(request, image))
-                .build();
+        return categoryService.create(request, image);
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public APIResponse<CategoryResponse> update(
+    public CategoryResponse update(
             @PathVariable Long id,
             @ModelAttribute CategoryRequest request,
             @RequestParam(required = false) MultipartFile image
     ) {
-        return APIResponse.<CategoryResponse>builder()
-                .result(categoryService.update(id, request, image))
-                .build();
+        return categoryService.update(id, request, image);
     }
 
     // DELETE
     @DeleteMapping("/{id}")
-    public APIResponse<Void> delete(@PathVariable Long id) {
+    public String delete(@PathVariable Long id) {
         categoryService.delete(id);
-        return APIResponse.<Void>builder().message("Deleted").build();
+        return "Deleted";
     }
 
     // GET ALL
     @GetMapping
-    public APIResponse<List<CategoryResponse>> getAll() {
-        return APIResponse.<List<CategoryResponse>>builder()
-                .result(categoryService.getAll())
-                .build();
+    public List<CategoryResponse> getAll() {
+        return categoryService.getAll();
     }
 
     // SEARCH
     @GetMapping("/search")
-    public APIResponse<List<CategoryResponse>> search(
+    public List<CategoryResponse> search(
             @RequestParam(required = false) String keyword
     ) {
-        return APIResponse.<List<CategoryResponse>>builder()
-                .result(categoryService.search(keyword))
-                .build();
+        return categoryService.search(keyword);
     }
 
     // GET BY ID
     @GetMapping("/{id}")
-    public APIResponse<CategoryResponse> getById(@PathVariable Long id) {
-        return APIResponse.<CategoryResponse>builder()
-                .result(categoryService.getById(id))
-                .build();
+    public CategoryResponse getById(@PathVariable Long id) {
+        return categoryService.getById(id);
     }
 }
