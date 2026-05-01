@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.pishop.request.SupplierRequest;
+import com.backend.pishop.response.SupplierDetailResponse;
 import com.backend.pishop.response.SupplierResponse;
 import com.backend.pishop.service.SupplierService;
 
@@ -28,7 +29,7 @@ public class SupplierAdminController {
 
     // CREATE
     @PostMapping
-    public SupplierResponse create(
+    public SupplierDetailResponse create(
             @ModelAttribute SupplierRequest request,
             @RequestParam(required = false) MultipartFile logo
     ) {
@@ -37,7 +38,7 @@ public class SupplierAdminController {
 
     // UPDATE (PATCH)
     @PatchMapping("/{id}")
-    public SupplierResponse update(
+    public SupplierDetailResponse update(
             @PathVariable Long id,
             @ModelAttribute SupplierRequest request,
             @RequestParam(required = false) MultipartFile logo
@@ -54,13 +55,13 @@ public class SupplierAdminController {
 
     // GET ALL
     @GetMapping
-    public List<SupplierResponse> getAll() {
+    public List<SupplierDetailResponse> getAll() {
         return supplierService.getAll();
     }
 
     // SEARCH
     @GetMapping("/search")
-    public List<SupplierResponse> search(
+    public List<SupplierDetailResponse> search(
             @RequestParam(required = false) String keyword
     ) {
         return supplierService.search(keyword);
@@ -68,7 +69,7 @@ public class SupplierAdminController {
 
     // GET BY ID
     @GetMapping("/{id}")
-    public SupplierResponse getById(@PathVariable Long id) {
+    public SupplierDetailResponse getById(@PathVariable Long id) {
         return supplierService.getById(id);
     }
 }

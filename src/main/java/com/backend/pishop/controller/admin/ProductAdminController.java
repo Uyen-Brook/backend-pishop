@@ -4,12 +4,14 @@ import com.backend.pishop.entity.Product;
 import com.backend.pishop.request.ProductCreateRequest;
 import com.backend.pishop.request.ProductUpdateRequest;
 import com.backend.pishop.response.ProductResponse;
+import com.backend.pishop.response.ProductSumaryResponse;
 import com.backend.pishop.service.admin.ProductAdminService;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +23,10 @@ public class ProductAdminController {
     private final ProductAdminService productAdminService;
 
     // CREATE
-    @PostMapping
+   
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponse> createProduct(
-            @RequestBody ProductCreateRequest request
+            @ModelAttribute ProductCreateRequest request
     ) {
         return ResponseEntity.ok(productAdminService.createProduct(request));
     }

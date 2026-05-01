@@ -82,8 +82,12 @@ public class OrderService {
         order.setToPhone(request.getToPhone());
         order.setToAddress(request.getToAddress());
         order.setPaymentMethod(request.getPaymentMethod());
-
-        order.setOrderStatus(OrderStatus.PENDDING);
+        if(request.getPaymentMethod() == PaymentMethod.BANK) {
+        	order.setOrderStatus(OrderStatus.PENDING);
+        }
+        else {
+        	order.setOrderStatus(OrderStatus.CONFIRMATION);
+        }
         order.setPayStatus(PayStatus.UNPAID);
         order.setCreateAt(LocalDateTime.now());
 
@@ -166,7 +170,7 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
 
         Order savedOrder = orderRepository.save(order);
-        if(request.getPaymentMethod() == PaymentMethod.BANK) {
+        if(request.getPaymentMethod() == PaymentMethod.COD) {
         	sendOrderConfirmationMail(savedOrder, account);
 
         }

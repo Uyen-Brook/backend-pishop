@@ -17,72 +17,103 @@ import org.springframework.data.repository.query.Param;
 import com.backend.pishop.entity.Product;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
-	@EntityGraph(attributePaths = {
-	        "brand",
-	        "supplier",
-	        "category",
-	        "productPromotions",
-	        "productPromotions.promotion"
-	    })
-	    List<Product> findAll();
+public interface ProductRepository
+        extends JpaRepository<Product, Long>,
+        JpaSpecificationExecutor<Product> {
 
-	    @EntityGraph(attributePaths = {
-	        "brand",
-	        "supplier",
-	        "category",
-	        "productPromotions",
-	        "productPromotions.promotion"
-	    })
-	    List<Product> findByBrand_Id(Long brandId);
+    @Override
+    @EntityGraph(attributePaths = {
+            "brand",
+            "supplier",
+            "category",
+            "productPromotions",
+            "productPromotions.promotion"
+    })
+    Page<Product> findAll(Pageable pageable);
 
-	    @EntityGraph(attributePaths = {
-	        "brand",
-	        "supplier",
-	        "category",
-	        "productPromotions",
-	        "productPromotions.promotion"
-	    })
-	    List<Product> findByCategory_Id(Long categoryId);
+    // ============================
+    // BRAND
+    // ============================
+    @EntityGraph(attributePaths = {
+            "brand",
+            "supplier",
+            "category",
+            "productPromotions",
+            "productPromotions.promotion"
+    })
+    Page<Product> findByBrand_Id(
+            Long brandId,
+            Pageable pageable
+    );
 
-	    @EntityGraph(attributePaths = {
-	        "brand",
-	        "supplier",
-	        "category",
-	        "productPromotions",
-	        "productPromotions.promotion"
-	    })
-	    List<Product> findBySupplier_Id(Long supplierId);
+    // ============================
+    // CATEGORY
+    // ============================
+    @EntityGraph(attributePaths = {
+            "brand",
+            "supplier",
+            "category",
+            "productPromotions",
+            "productPromotions.promotion"
+    })
+    Page<Product> findByCategory_Id(
+            Long categoryId,
+            Pageable pageable
+    );
 
-	    // 🔥 combo filter
-	    @EntityGraph(attributePaths = {
-	        "brand",
-	        "supplier",
-	        "category",
-	        "productPromotions",
-	        "productPromotions.promotion"
-	    })
-	    List<Product> findByBrand_IdAndCategory_IdAndSupplier_Id(
-	            Long brandId, Long categoryId, Long supplierId);
-	   
-	    @Query("""
-	            SELECT p
-	            FROM Product p
-	            WHERE
-	                (:keyword IS NULL
-	                    OR LOWER(p.modelName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-	                    OR LOWER(p.modelNumber) LIKE LOWER(CONCAT('%', :keyword, '%')))
-	            AND (:categoryId IS NULL OR p.category.id = :categoryId)
-	            AND (:brandId IS NULL OR p.brand.id = :brandId)
-	            AND (:supplierId IS NULL OR p.supplier.id = :supplierId)
-	            AND (:deleted IS NULL OR p.deleted = :deleted)
-	        """)
-	        Page<Product> searchProducts(
-	                @Param("keyword") String keyword,
-	                @Param("categoryId") Long categoryId,
-	                @Param("brandId") Long brandId,
-	                @Param("supplierId") Long supplierId,
-	                @Param("deleted") Boolean deleted,
-	                Pageable pageable
-	        );
+    // ============================
+    // SUPPLIER
+    // ============================
+    @EntityGraph(attributePaths = {
+            "brand",
+            "supplier",
+            "category",
+            "productPromotions",
+            "productPromotions.promotion"
+    })
+    Page<Product> findBySupplier_Id(
+            Long supplierId,
+            Pageable pageable
+    );
+
+    // ============================
+    // COMBO FILTER
+    // ============================
+    @EntityGraph(attributePaths = {
+            "brand",
+            "supplier",
+            "category",
+            "productPromotions",
+            "productPromotions.promotion"
+    })
+    Page<Product> findByBrand_IdAndCategory_IdAndSupplier_Id(
+            Long brandId,
+            Long categoryId,
+            Long supplierId,
+            Pageable pageable
+    );
+
+    // ============================
+    // SEARCH
+    // ============================
+    @Query("""
+            SELECT p
+            FROM Product p
+            WHERE
+                (:keyword IS NULL
+                    OR LOWER(p.modelName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(p.modelNumber) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            AND (:categoryId IS NULL OR p.category.id = :categoryId)
+            AND (:brandId IS NULL OR p.brand.id = :brandId)
+            AND (:supplierId IS NULL OR p.supplier.id = :supplierId)
+            AND (:deleted IS NULL OR p.deleted = :deleted)
+        """)
+    Page<Product> searchProducts(
+            @Param("keyword") String keyword,
+            @Param("categoryId") Long categoryId,
+            @Param("brandId") Long brandId,
+            @Param("supplierId") Long supplierId,
+            @Param("deleted") Boolean deleted,
+            Pageable pageable
+    );
 }

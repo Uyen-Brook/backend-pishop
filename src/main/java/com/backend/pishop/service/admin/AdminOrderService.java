@@ -1,22 +1,21 @@
 package com.backend.pishop.service.admin;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.pishop.entity.Order;
 import com.backend.pishop.enums.OrderStatus;
-import com.backend.pishop.repository.OrderRepository;
-
-import lombok.RequiredArgsConstructor;
-import java.time.LocalDateTime;
 import com.backend.pishop.mapper.OrderMapper;
-
+import com.backend.pishop.repository.OrderRepository;
 import com.backend.pishop.request.OrderRequest;
 import com.backend.pishop.response.OrderResponse;
 
-
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -27,21 +26,17 @@ public class AdminOrderService {
     private final OrderMapper orderMapper;
 
     // =====================================================
-    // GET ALL
+    // GET ALL (PAGINATION + SORT)
     // =====================================================
+    public Page<OrderResponse> getAllOrders(Pageable pageable) {
 
-    public List<OrderResponse> getAllOrders() {
-
-        return orderRepository.findAll()
-                .stream()
-                .map(orderMapper::toResponse)
-                .toList();
+        return orderRepository.findAll(pageable)
+                .map(orderMapper::toResponse);
     }
 
     // =====================================================
     // GET DETAIL
     // =====================================================
-
     public OrderResponse getOrderDetail(Long id) {
 
         Order order = orderRepository.findById(id)
@@ -52,9 +47,8 @@ public class AdminOrderService {
     }
 
     // =====================================================
-    // SEARCH
+    // SEARCH (NO PAGINATION - giữ nguyên như bạn đang dùng)
     // =====================================================
-
     public List<OrderResponse> searchOrders(
             String keyword,
             OrderStatus status,
@@ -62,18 +56,18 @@ public class AdminOrderService {
     ) {
 
         return orderRepository.searchOrders(
-                keyword,
-                status,
-                accountId
-        ).stream()
-         .map(orderMapper::toResponse)
-         .toList();
+                        keyword,
+                        status,
+                        accountId
+                )
+                .stream()
+                .map(orderMapper::toResponse)
+                .toList();
     }
 
     // =====================================================
     // CREATE
     // =====================================================
-
     public OrderResponse createOrder(OrderRequest request) {
 
         Order order = new Order();
@@ -83,10 +77,9 @@ public class AdminOrderService {
         order.setToAddress(request.getToAddress());
 
         order.setVoucherCode(request.getVoucherCode());
-
         order.setPaymentMethod(request.getPaymentMethod());
 
-        order.setOrderStatus(OrderStatus.PENDDING);
+        order.setOrderStatus(OrderStatus.PENDING);
 
         order.setCreateAt(LocalDateTime.now());
         order.setLastUpdate(LocalDateTime.now());
@@ -99,11 +92,7 @@ public class AdminOrderService {
     // =====================================================
     // UPDATE
     // =====================================================
-
-    public OrderResponse updateOrder(
-            Long id,
-            OrderRequest request
-    ) {
+    public OrderResponse updateOrder(Long id, OrderRequest request) {
 
         Order order = orderRepository.findById(id)
                 .orElseThrow(() ->
@@ -114,7 +103,6 @@ public class AdminOrderService {
         order.setToAddress(request.getToAddress());
 
         order.setVoucherCode(request.getVoucherCode());
-
         order.setPaymentMethod(request.getPaymentMethod());
 
         order.setLastUpdate(LocalDateTime.now());
@@ -127,18 +115,13 @@ public class AdminOrderService {
     // =====================================================
     // CHANGE STATUS
     // =====================================================
-
-    public OrderResponse updateStatus(
-            Long orderId,
-            OrderStatus status
-    ) {
+    public OrderResponse updateStatus(Long orderId, OrderStatus status) {
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Order not found"));
 
         order.setOrderStatus(status);
-
         order.setLastUpdate(LocalDateTime.now());
 
         Order updated = orderRepository.save(order);
@@ -149,16 +132,13 @@ public class AdminOrderService {
     // =====================================================
     // CANCEL ORDER
     // =====================================================
-
     public OrderResponse cancelOrder(Long orderId) {
-
         return updateStatus(orderId, OrderStatus.CANCELLED);
     }
 
     // =====================================================
     // DELETE
     // =====================================================
-
     public void deleteOrder(Long orderId) {
 
         Order order = orderRepository.findById(orderId)
@@ -167,5 +147,4 @@ public class AdminOrderService {
 
         orderRepository.delete(order);
     }
-    
 }

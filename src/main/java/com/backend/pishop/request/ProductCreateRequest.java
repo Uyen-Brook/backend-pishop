@@ -12,17 +12,19 @@ import java.util.List;
 
 @Data
 public class ProductCreateRequest {
-    private String modelName;
+	
+    private String modelName;//1
     private String specification; // JSON string
-    private String description;
-    private BigDecimal importPrice;
+    private String description;//5
+    private BigDecimal importPrice;//4
     private BigDecimal taxVat;
-    private BigDecimal price;
-    private String modelNumber;
+    private BigDecimal price;//3
+    
+    private String modelNumber;//2
     private MultipartFile thumbnail;     // ảnh chính
     private List<MultipartFile> listImage; // nhiều ảnh p
-    private Integer quantity;
-    private ProductStatus productStatus;
+    private Integer quantity;//6
+    private ProductStatus productStatus;//7
     private Long brandId;
     private Long supplierId;
     private Long categoryId;

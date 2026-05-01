@@ -17,7 +17,7 @@ public class SupplierDetailResponse {
 	    private String logo;
 	    
 	    private String address;
-	    
+	    private String representative;
 	    private String note;
 	    
 	    private String website;

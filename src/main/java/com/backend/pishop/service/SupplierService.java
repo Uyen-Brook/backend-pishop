@@ -11,6 +11,7 @@ import com.backend.pishop.enums.ResourceType;
 import com.backend.pishop.mapper.SupplierMapper;
 import com.backend.pishop.repository.SupplierRepository;
 import com.backend.pishop.request.SupplierRequest;
+import com.backend.pishop.response.SupplierDetailResponse;
 import com.backend.pishop.response.SupplierResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -23,9 +24,9 @@ public class SupplierService {
     private final CloudinaryService cloudinaryService;
 
     // CREATE
-    public SupplierResponse create(SupplierRequest request, MultipartFile logo) {
+    public SupplierDetailResponse create(SupplierRequest request, MultipartFile logo) {
         Supplier supplier = new Supplier();
-
+        
         supplier.setName(request.getName());
         supplier.setTaxcode(request.getTaxcode());
         supplier.setEmail(request.getEmail());
@@ -33,17 +34,19 @@ public class SupplierService {
         supplier.setAddress(request.getAddress());
         supplier.setNote(request.getNote());
         supplier.setWebsite(request.getWebsite());
+        supplier.setRepresentative(request.getRepresentative());
+        
 
         if (logo != null && !logo.isEmpty()) {
             String logoUrl = cloudinaryService.uploadImage(logo, ResourceType.LOGO);
             supplier.setLogo(logoUrl);
         }
 
-        return SupplierMapper.toResponse(supplierRepository.save(supplier));
+        return SupplierMapper.toResponseDetail(supplierRepository.save(supplier));
     }
 
     // UPDATE (partial)
-    public SupplierResponse update(Long id, SupplierRequest request, MultipartFile logo) {
+    public SupplierDetailResponse update(Long id, SupplierRequest request, MultipartFile logo) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
 
@@ -55,13 +58,14 @@ public class SupplierService {
         Optional.ofNullable(request.getAddress()).ifPresent(supplier::setAddress);
         Optional.ofNullable(request.getNote()).ifPresent(supplier::setNote);
         Optional.ofNullable(request.getWebsite()).ifPresent(supplier::setWebsite);
+        Optional.ofNullable(request.getRepresentative()).ifPresent(supplier::setRepresentative);
 
         if (logo != null && !logo.isEmpty()) {
             String logoUrl = cloudinaryService.uploadImage(logo, ResourceType.LOGO);
             supplier.setLogo(logoUrl);
         }
 
-        return SupplierMapper.toResponse(supplierRepository.save(supplier));
+        return SupplierMapper.toResponseDetail(supplierRepository.save(supplier));
     }
 
     // DELETE
@@ -70,26 +74,26 @@ public class SupplierService {
     }
 
     // GET ALL
-    public List<SupplierResponse> getAll() {
+    public List<SupplierDetailResponse> getAll() {
         return supplierRepository.findAll()
                 .stream()
-                .map(SupplierMapper::toResponse)
+                .map(SupplierMapper::toResponseDetail)
                 .toList();
     }
 
     // GET BY ID
-    public SupplierResponse getById(Long id) {
+    public SupplierDetailResponse getById(Long id) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplier not found"));
 
-        return SupplierMapper.toResponse(supplier);
+        return SupplierMapper.toResponseDetail(supplier);
     }
 
     // SEARCH
-    public List<SupplierResponse> search(String keyword) {
+    public List<SupplierDetailResponse> search(String keyword) {
         return supplierRepository.search(keyword)
                 .stream()
-                .map(SupplierMapper::toResponse)
+                .map(SupplierMapper::toResponseDetail)
                 .toList();
     }
 }

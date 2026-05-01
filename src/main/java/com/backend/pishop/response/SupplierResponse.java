@@ -6,6 +6,7 @@ import lombok.Data;
 public class SupplierResponse {
 	private Long id;
 	private String name;
+	private String representative;
 	private String logo;
     private String taxcode;
 	private String phone;

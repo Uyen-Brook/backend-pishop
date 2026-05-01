@@ -15,6 +15,7 @@ public class SupplierMapper {
 	        dto.setAddress(supplier.getAddress());
 	        dto.setPhone(supplier.getPhone());
 	        dto.setAddress(supplier.getTaxcode());
+	       dto.setRepresentative(supplier.getRepresentative());
 	        return dto;
 	  }
 	 
@@ -29,6 +30,7 @@ public class SupplierMapper {
 		 dto.setNote(supplier.getNote());
 		 dto.setWebsite(supplier.getWebsite());
 		 dto.setLogo(supplier.getLogo());
+		 dto.setRepresentative(supplier.getRepresentative());
 		 return dto;
 	 }
 }

@@ -10,5 +10,6 @@ public class SupplierRequest {
     private String phone;
     private String address;
     private String note;
+    private String representative;
     private String website;
 }

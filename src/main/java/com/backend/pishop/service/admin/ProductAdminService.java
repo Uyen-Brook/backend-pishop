@@ -12,10 +12,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.backend.pishop.entity.Product;
 import com.backend.pishop.enums.ProductStatus;
 import com.backend.pishop.enums.ResourceType;
+import com.backend.pishop.mapper.ProductMapper;
 import com.backend.pishop.repository.ProductRepository;
 import com.backend.pishop.request.ProductCreateRequest;
 import com.backend.pishop.request.ProductUpdateRequest;
 import com.backend.pishop.response.ProductResponse;
+import com.backend.pishop.response.ProductSumaryResponse;
 import com.backend.pishop.service.CloudinaryService;
 import com.backend.pishop.util.CloudinaryHelper;
 import com.backend.pishop.util.ImageUtils;
@@ -35,14 +37,14 @@ public class ProductAdminService {
 
         Product product = new Product();
 
-        product.setModelName(request.getModelName());
-        product.setModelNumber(request.getModelNumber());
-        product.setPrice(request.getPrice());
-        product.setImportPrice(request.getImportPrice());
-        product.setDescription(request.getDescription());
-        product.setQuanlity(request.getQuantity());
+        product.setModelName(request.getModelName());//1
+        product.setModelNumber(request.getModelNumber());//2
+        product.setPrice(request.getPrice());//3
+        product.setImportPrice(request.getImportPrice());//4
+        product.setDescription(request.getDescription());//5
+        product.setQuanlity(request.getQuantity());//6
 
-        product.setProductStatus(ProductStatus.NEW);
+        product.setProductStatus(ProductStatus.NEW);//7
 
         product.setCreateAt(LocalDateTime.now());
         product.setUpdateAt(LocalDateTime.now());
@@ -74,7 +76,8 @@ public class ProductAdminService {
 
         Product saved = productRepository.save(product);
 
-        return mapToResponse(saved);
+        return mapToResponse(product);
+        
     }
     
     
@@ -128,7 +131,7 @@ public class ProductAdminService {
 
         Product updated = productRepository.save(product);
 
-        return mapToResponse(updated);
+        return mapToResponse(product);
     }
     //Detail
     public ProductResponse getProductDetail(Long id) {
@@ -138,7 +141,8 @@ public class ProductAdminService {
 
         return mapToResponse(product);
     }
- 
+    
+    // lấy tất cả
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
 
         return productRepository.findAll(pageable)
@@ -164,7 +168,7 @@ public class ProductAdminService {
                 pageable
         ).map(this::mapToResponse);
     }
-
+    // xóa mềm
     public void softDeleteProduct(Long id) {
 
         Product product = productRepository.findById(id)
@@ -175,6 +179,7 @@ public class ProductAdminService {
         productRepository.save(product);
     }
 
+   // xóa vĩnh viễn
     public void hardDeleteProduct(Long id) {
 
         productRepository.deleteById(id);
@@ -191,7 +196,7 @@ public class ProductAdminService {
         productRepository.save(product);
     }
 
-  
+  // thay đôi trạng thái
     public ProductResponse changeStatus(Long id, String status) {
 
         Product product = productRepository.findById(id)

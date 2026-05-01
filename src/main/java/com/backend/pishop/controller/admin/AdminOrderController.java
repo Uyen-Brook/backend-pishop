@@ -1,7 +1,7 @@
 package com.backend.pishop.controller.admin;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,38 +20,34 @@ public class AdminOrderController {
     private final AdminOrderService adminOrderService;
 
     // =========================
-    // GET ALL
+    // GET ALL (PAGINATION - Pageable)
     // =========================
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAllOrders() {
-        return ResponseEntity.ok(adminOrderService.getAllOrders());
+    public ResponseEntity<Page<OrderResponse>> getAllOrders(Pageable pageable) {
+        return ResponseEntity.ok(
+                adminOrderService.getAllOrders(pageable)
+        );
     }
 
     // =========================
     // GET DETAIL
     // =========================
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponse> getOrderDetail(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<OrderResponse> getOrderDetail(@PathVariable Long id) {
         return ResponseEntity.ok(adminOrderService.getOrderDetail(id));
     }
 
     // =========================
-    // SEARCH
+    // SEARCH (giữ list nếu chưa cần paging)
     // =========================
     @GetMapping("/search")
-    public ResponseEntity<List<OrderResponse>> searchOrders(
+    public ResponseEntity<java.util.List<OrderResponse>> searchOrders(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) Long accountId
     ) {
         return ResponseEntity.ok(
-                adminOrderService.searchOrders(
-                        keyword,
-                        status,
-                        accountId
-                )
+                adminOrderService.searchOrders(keyword, status, accountId)
         );
     }
 
@@ -59,9 +55,7 @@ public class AdminOrderController {
     // CREATE ORDER
     // =========================
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(
-            @RequestBody OrderRequest request
-    ) {
+    public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest request) {
         return ResponseEntity.ok(adminOrderService.createOrder(request));
     }
 
@@ -95,21 +89,15 @@ public class AdminOrderController {
     // CANCEL ORDER
     // =========================
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<OrderResponse> cancelOrder(
-            @PathVariable Long id
-    ) {
-        return ResponseEntity.ok(
-                adminOrderService.cancelOrder(id)
-        );
+    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(adminOrderService.cancelOrder(id));
     }
 
     // =========================
     // DELETE ORDER
     // =========================
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         adminOrderService.deleteOrder(id);
         return ResponseEntity.ok().build();
     }

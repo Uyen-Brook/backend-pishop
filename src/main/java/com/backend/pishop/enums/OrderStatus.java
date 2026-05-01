@@ -1,7 +1,8 @@
 package com.backend.pishop.enums;
 
 public enum OrderStatus {
-	PENDDING("Chờ thanh toán"),
+	PENDING("Chờ thanh toán"),
+	CONFIRMATION("Chờ xác nhận"),
 	PAID("Đã thanh toán"),
 	CONFIRMED("Đã xác nhận"),
 	SHIPPING("Đang giao hàng"),

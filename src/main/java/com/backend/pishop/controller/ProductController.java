@@ -1,20 +1,13 @@
 package com.backend.pishop.controller;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.backend.pishop.entity.Brand;
-import com.backend.pishop.entity.Category;
-import com.backend.pishop.entity.Product;
-import com.backend.pishop.entity.Supplier;
 import com.backend.pishop.response.BrandResponse;
 import com.backend.pishop.response.CategoryResponse;
 import com.backend.pishop.response.ProductResponse;
@@ -29,80 +22,129 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class ProductController {
-	@Autowired
-    private final ProductService productService; 
 
-    // lấy tất cả
+    @Autowired
+    private final ProductService productService;
+
+    // ============================
+    // PRODUCTS
+    // ============================
+
+    // GET ALL PRODUCTS WITH PAGINATION
+    // Example:
+    // /api/products?page=0&size=10&sort=id,desc
     @GetMapping("/products")
-    public ResponseEntity<List<ProductSumaryResponse>> getAll() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<Page<ProductSumaryResponse>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(productService.getAllProducts(pageable));
     }
-	
+
     @GetMapping("/product/{id}")
     public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id) {
         ProductResponse response = productService.findByProductId(id);
         return ResponseEntity.ok(response);
     }
-    
+
+    // PRODUCTS BY BRAND
     @GetMapping("/product/brand/{brandId}")
-    public ResponseEntity<List<ProductSumaryResponse>> getByBrand(@PathVariable Long brandId) {
-        return ResponseEntity.ok(productService.getProductsByBrand(brandId));
+    public ResponseEntity<Page<ProductSumaryResponse>> getByBrand(
+            @PathVariable Long brandId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                productService.getProductsByBrand(brandId, pageable)
+        );
     }
 
+    // PRODUCTS BY CATEGORY
     @GetMapping("/product/category/{categoryId}")
-    public ResponseEntity<List<ProductSumaryResponse>> getByCategory(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(productService.getProductsByCategory(categoryId));
+    public ResponseEntity<Page<ProductSumaryResponse>> getByCategory(
+            @PathVariable Long categoryId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                productService.getProductsByCategory(categoryId, pageable)
+        );
     }
 
-    // ============================
-    // FILTER BY SUPPLIER
-    // ============================
+    // PRODUCTS BY SUPPLIER
     @GetMapping("/supplier/{supplierId}")
-    public ResponseEntity<List<ProductSumaryResponse>> getBySupplier(@PathVariable Long supplierId) {
-        return ResponseEntity.ok(productService.getProductsBySupplier(supplierId));
+    public ResponseEntity<Page<ProductSumaryResponse>> getBySupplier(
+            @PathVariable Long supplierId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                productService.getProductsBySupplier(supplierId, pageable)
+        );
     }
 
     // ============================
-    // COMBO FILTER
-    // /api/products/filter?brandId=1&categoryId=2&supplierId=3
+    // FILTER PRODUCTS
+    // Example:
+    // /api/filter?brandId=1&categoryId=2&supplierId=3&page=0&size=10
     // ============================
     @GetMapping("/filter")
-    public ResponseEntity<List<ProductSumaryResponse>> filterProducts(
+    public ResponseEntity<Page<ProductSumaryResponse>> filterProducts(
             @RequestParam(required = false) Long brandId,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long supplierId
+            @RequestParam(required = false) Long supplierId,
+            Pageable pageable
     ) {
-        return ResponseEntity.ok(productService.filterProducts(brandId, categoryId, supplierId));
+        return ResponseEntity.ok(
+                productService.filterProducts(
+                        brandId,
+                        categoryId,
+                        supplierId,
+                        pageable
+                )
+        );
     }
-   
-    
-	  @GetMapping("/brands")
-	  public List<BrandResponse> getAllBrands() {
-	      return productService.getAllBrands();
-	  }
-	 
-	  
-	  @GetMapping("/brands/{id}")
-	  public BrandResponse getBrandDetail(@PathVariable Long id) {
-	      return productService.getBrandDetailById(id);
-	  }
-	  
-	  @GetMapping("/suppliers")
-    public List<SupplierResponse> getAllSuppliers() {
-        return productService.getAllSuppliers();
+
+    // ============================
+    // BRANDS
+    // ============================
+
+    @GetMapping("/brands")
+    public ResponseEntity<List<BrandResponse>> getAllBrands() {
+        return ResponseEntity.ok(
+            productService.getAllBrands()
+        );
+    }
+
+    @GetMapping("/brands/{id}")
+    public ResponseEntity<BrandResponse> getBrandDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                productService.getBrandDetailById(id)
+        );
+    }
+
+    // ============================
+    // SUPPLIERS
+    // ============================
+
+    @GetMapping("/suppliers")
+    public ResponseEntity<List<SupplierResponse>> getAllSuppliers() {
+        return ResponseEntity.ok(
+            productService.getAllSuppliers()
+        );
     }
 
     @GetMapping("/suppliers/{id}")
-    public SupplierDetailResponse getSupplierDetail(@PathVariable Long id) {
-        return productService.getSupplierDetailById(id);
+    public ResponseEntity<SupplierDetailResponse> getSupplierDetail(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                productService.getSupplierDetailById(id)
+        );
     }
-    
-    
-    @GetMapping("/categories")
-    public List<CategoryResponse> getAllCategories() {
-		return productService.getAllCategories();
-	}
-    
-   
 
+    // ============================
+    // CATEGORIES
+    // ============================
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+        return ResponseEntity.ok(
+            productService.getAllCategories()
+        );
+    }
 }
