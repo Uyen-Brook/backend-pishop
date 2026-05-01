@@ -29,7 +29,7 @@ public class OrderMapper {
                 .orderStatus(order.getOrderStatus())
                 .paymentMethod(order.getPaymentMethod())
                 .payStatus(order.getPayStatus())
-                .createAt(order.getCreateAt())
+                .createAt(order.getCreatedAt())
                 .lastUpdate(order.getLastUpdate())
                 .items(order.getItems()
                         .stream()

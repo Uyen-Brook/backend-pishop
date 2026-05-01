@@ -1,7 +1,6 @@
 package com.backend.pishop.service.admin;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,22 +46,22 @@ public class AdminOrderService {
     }
 
     // =====================================================
-    // SEARCH (NO PAGINATION - giữ nguyên như bạn đang dùng)
+    // SEARCH (PAGINATION FIXED)
     // =====================================================
-    public List<OrderResponse> searchOrders(
+    public Page<OrderResponse> searchOrders(
             String keyword,
             OrderStatus status,
-            Long accountId
+            Long accountId,
+            Pageable pageable
     ) {
 
         return orderRepository.searchOrders(
                         keyword,
                         status,
-                        accountId
+                        accountId,
+                        pageable
                 )
-                .stream()
-                .map(orderMapper::toResponse)
-                .toList();
+                .map(orderMapper::toResponse);
     }
 
     // =====================================================
@@ -81,7 +80,7 @@ public class AdminOrderService {
 
         order.setOrderStatus(OrderStatus.PENDING);
 
-        order.setCreateAt(LocalDateTime.now());
+        order.setCreatedAt(LocalDateTime.now());
         order.setLastUpdate(LocalDateTime.now());
 
         Order saved = orderRepository.save(order);

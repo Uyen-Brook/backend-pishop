@@ -80,7 +80,7 @@ public class Order {
     private PayStatus payStatus;
 
     @Column(name = "created_at")
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "last_update")
     private LocalDateTime lastUpdate;

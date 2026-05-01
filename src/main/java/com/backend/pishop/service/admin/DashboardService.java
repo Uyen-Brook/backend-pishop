@@ -32,7 +32,7 @@ public class DashboardService {
         LocalDateTime start = fromDate.atStartOfDay();
         LocalDateTime end = toDate.atTime(LocalTime.MAX);
 
-        long totalOrders = orderRepository.countByCreateAtBetween(start, end);
+        long totalOrders = orderRepository.countByCreatedAtBetween(start, end);
         long totalProducts = productRepository.count();
         long totalAccounts = accountRepository.count();
         BigDecimal totalRevenue = orderRepository.sumRevenueBetween(start, end);

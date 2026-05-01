@@ -19,9 +19,9 @@ public class AdminOrderController {
 
     private final AdminOrderService adminOrderService;
 
-    // =========================
-    // GET ALL (PAGINATION - Pageable)
-    // =========================
+    // =====================================================
+    // GET ALL (PAGINATION)
+    // =====================================================
     @GetMapping
     public ResponseEntity<Page<OrderResponse>> getAllOrders(Pageable pageable) {
         return ResponseEntity.ok(
@@ -29,39 +29,46 @@ public class AdminOrderController {
         );
     }
 
-    // =========================
-    // GET DETAIL
-    // =========================
+    // =====================================================
+    // GET DETAIL (không cần paging)
+    // =====================================================
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrderDetail(@PathVariable Long id) {
-        return ResponseEntity.ok(adminOrderService.getOrderDetail(id));
-    }
-
-    // =========================
-    // SEARCH (giữ list nếu chưa cần paging)
-    // =========================
-    @GetMapping("/search")
-    public ResponseEntity<java.util.List<OrderResponse>> searchOrders(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) OrderStatus status,
-            @RequestParam(required = false) Long accountId
-    ) {
         return ResponseEntity.ok(
-                adminOrderService.searchOrders(keyword, status, accountId)
+                adminOrderService.getOrderDetail(id)
         );
     }
 
-    // =========================
-    // CREATE ORDER
-    // =========================
-    @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest request) {
-        return ResponseEntity.ok(adminOrderService.createOrder(request));
+    // =====================================================
+    // SEARCH (PAGINATION)
+    // =====================================================
+    @GetMapping("/search")
+    public ResponseEntity<Page<OrderResponse>> searchOrders(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) Long accountId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                adminOrderService.searchOrders(keyword, status, accountId, pageable)
+        );
     }
 
-    // =========================
+    // =====================================================
+    // CREATE ORDER
+    // =====================================================
+    @PostMapping
+    public ResponseEntity<OrderResponse> createOrder(
+            @RequestBody OrderRequest request
+    ) {
+        return ResponseEntity.ok(
+                adminOrderService.createOrder(request)
+        );
+    }
+
+    // =====================================================
     // UPDATE ORDER
-    // =========================
+    // =====================================================
     @PutMapping("/{id}")
     public ResponseEntity<OrderResponse> updateOrder(
             @PathVariable Long id,
@@ -72,9 +79,9 @@ public class AdminOrderController {
         );
     }
 
-    // =========================
+    // =====================================================
     // CHANGE STATUS
-    // =========================
+    // =====================================================
     @PatchMapping("/{id}/status")
     public ResponseEntity<OrderResponse> changeStatus(
             @PathVariable Long id,
@@ -85,17 +92,19 @@ public class AdminOrderController {
         );
     }
 
-    // =========================
+    // =====================================================
     // CANCEL ORDER
-    // =========================
+    // =====================================================
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {
-        return ResponseEntity.ok(adminOrderService.cancelOrder(id));
+        return ResponseEntity.ok(
+                adminOrderService.cancelOrder(id)
+        );
     }
 
-    // =========================
+    // =====================================================
     // DELETE ORDER
-    // =========================
+    // =====================================================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         adminOrderService.deleteOrder(id);

@@ -17,7 +17,7 @@ import com.backend.pishop.config.APIResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/admin/dashboard")
+@RequestMapping("api/admin/dashboard")
 @RequiredArgsConstructor
 public class DashboardAdminController {
 

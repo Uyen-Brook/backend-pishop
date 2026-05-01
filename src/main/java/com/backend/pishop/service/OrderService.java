@@ -89,7 +89,7 @@ public class OrderService {
         	order.setOrderStatus(OrderStatus.CONFIRMATION);
         }
         order.setPayStatus(PayStatus.UNPAID);
-        order.setCreateAt(LocalDateTime.now());
+        order.setCreatedAt(LocalDateTime.now());
 
         Province province = provinceRepository.findById(request.getToProvinceCode())
                 .orElseThrow(() -> new RuntimeException("Province not found"));
@@ -251,7 +251,7 @@ public class OrderService {
             </div>
             """,
                 order.getId(),
-                order.getCreateAt(),
+                order.getCreatedAt(),
                 itemsHtml,
                 formatPrice(order.getTotalAmount()),
                 order.getPaymentMethod(),
@@ -288,7 +288,7 @@ public class OrderService {
     public List<OrderResponse> getOrdersByAccountId(Long accountId) {
 
         return orderRepository
-                .findByAccountIdOrderByCreateAtDesc(accountId)
+                .findByAccountIdOrderByCreatedAtDesc(accountId)
                 .stream()
                 .map(orderMapper::toResponse)
                 .toList();
@@ -297,7 +297,7 @@ public class OrderService {
     public List<OrderResponse> getOrdersByStatus(OrderStatus status) {
 
         return orderRepository
-                .findByOrderStatusOrderByCreateAtDesc(status)
+                .findByOrderStatusOrderByCreatedAtDesc(status)
                 .stream()
                 .map(orderMapper::toResponse)
                 .toList();
@@ -305,10 +305,9 @@ public class OrderService {
 
     public List<OrderResponse> getUnpaidBankOrdersByAccountId(Long accountId) {
 
-        return orderRepository
-                .findByAccountIdAndPaymentMethodAndPayStatusOrderByCreateAtDesc(
+        return orderRepository.findByAccountIdAndPaymentMethodAndPayStatusOrderByCreatedAtDesc(
                         accountId,
-                        "BANK",
+                        PaymentMethod.BANK,
                         PayStatus.UNPAID
                 )
                 .stream()
