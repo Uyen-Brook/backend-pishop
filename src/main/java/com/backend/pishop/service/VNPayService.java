@@ -83,113 +83,34 @@ public class VNPayService {
         return paymentUrl;
     }
 
-    public int orderReturn(HttpServletRequest request){
-        Map fields = new HashMap();
-        for (Enumeration params = request.getParameterNames(); params.hasMoreElements();) {
-            String fieldName = null;
-            String fieldValue = null;
-            try {
-        
-                fieldName = URLEncoder.encode((String) params.nextElement(), StandardCharsets.US_ASCII.toString());
-                fieldValue = URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII.toString());
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+    public int orderReturn(HttpServletRequest request) {
+        Map<String, String> fields = new HashMap<>();
+        for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
+            String fieldName = params.nextElement();
+            String fieldValue = request.getParameter(fieldName);
+            if (fieldValue != null && fieldValue.length() > 0) {
                 fields.put(fieldName, fieldValue);
             }
         }
 
         String vnp_SecureHash = request.getParameter("vnp_SecureHash");
-        if (fields.containsKey("vnp_SecureHashType")) {
-            fields.remove("vnp_SecureHashType");
-        }
-        if (fields.containsKey("vnp_SecureHash")) {
-            fields.remove("vnp_SecureHash");
-        }
+        // loại bỏ các trường không cần thiết
+        fields.remove("vnp_SecureHashType");
+        fields.remove("vnp_SecureHash");
+
+        // tạo chữ ký từ các field
         String signValue = VNPayConfig.hashAllFields(fields);
+
         if (signValue.equals(vnp_SecureHash)) {
+            // kiểm tra trạng thái giao dịch
             if ("00".equals(request.getParameter("vnp_TransactionStatus"))) {
-                return 1;
+                return 1; // thành công
             } else {
-                return 0;
+                return 0; // thất bại
             }
         } else {
-            return -1;
+            return -1; // sai chữ ký
         }
     }
-    
-//    public int orderReturn(HttpServletRequest request) {
-//
-//        // 1. Lấy toàn bộ params (KHÔNG encode sai như trước)
-//        Map<String, String> fields = new HashMap<>();
-//        for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
-//            String fieldName = params.nextElement();
-//            String fieldValue = request.getParameter(fieldName);
-//            if (fieldValue != null && fieldValue.length() > 0) {
-//                fields.put(fieldName, fieldValue);
-//            }
-//        }
-//
-//        // 2. Lấy secure hash từ VNPay
-//        String vnp_SecureHash = request.getParameter("vnp_SecureHash");
-//
-//        // 3. Remove hash fields trước khi verify
-//        fields.remove("vnp_SecureHash");
-//        fields.remove("vnp_SecureHashType");
-//
-//        // 4. Tạo lại chữ ký
-//        String signValue = VNPayConfig.hashAllFields(fields);
-//
-//        // ❌ Nếu sai chữ ký → reject ngay
-//        if (!signValue.equals(vnp_SecureHash)) {
-//            return -1; // dữ liệu bị giả mạo
-//        }
-//
-//        // 5. Extract dữ liệu quan trọng
-//        String txnRef = request.getParameter("vnp_TxnRef");
-//        String amount = request.getParameter("vnp_Amount");
-//        String orderInfo = request.getParameter("vnp_OrderInfo");
-//
-//        String responseCode = request.getParameter("vnp_ResponseCode");
-//        String transactionStatus = request.getParameter("vnp_TransactionStatus");
-//
-//        String transactionNo = request.getParameter("vnp_TransactionNo");
-//        String bankCode = request.getParameter("vnp_BankCode");
-//        String payDate = request.getParameter("vnp_PayDate");
-//
-//        String rawData = request.getQueryString(); // 🔥 debug cực quan trọng
-//
-//        // 6. TODO: Tìm giao dịch trong DB
-//        // Payment payment = paymentRepository.findByTxnRef(txnRef);
-//
-//        // ❗ chống double payment (rất quan trọng)
-//        // if (payment.getStatus().equals("SUCCESS")) return 1;
-//
-//        // 7. Xử lý kết quả
-//        if ("00".equals(responseCode) && "00".equals(transactionStatus)) {
-//
-//            // ✅ SUCCESS
-//            // payment.setStatus("SUCCESS");
-//
-//            // TODO: update DB
-//            // payment.setTransactionNo(transactionNo);
-//            // payment.setBankCode(bankCode);
-//            // payment.setPayDate(payDate);
-//            // payment.setResponseCode(responseCode);
-//            // payment.setRawData(rawData);
-//
-//            return 1;
-//
-//        } else {
-//
-//            // ❌ FAIL
-//            // payment.setStatus("FAIL");
-//            // payment.setResponseCode(responseCode);
-//            // payment.setRawData(rawData);
-//
-//            return 0;
-//        }
-//    }
 
 }

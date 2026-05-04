@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Async;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.backend.pishop.response.OrderResponse;
 import com.backend.pishop.entity.Account;
+import com.backend.pishop.entity.Cart;
 import com.backend.pishop.entity.Order;
 import com.backend.pishop.entity.OrderItem;
 import com.backend.pishop.entity.Product;
@@ -27,6 +29,8 @@ import com.backend.pishop.enums.PaymentMethod;
 import com.backend.pishop.mapper.OrderMapper;
 import com.backend.pishop.repository.AccountRepository;
 import com.backend.pishop.repository.AccountVoucherRepository;
+import com.backend.pishop.repository.CartItemRepository;
+import com.backend.pishop.repository.CartRepository;
 import com.backend.pishop.repository.OrderRepository;
 import com.backend.pishop.repository.ProductPromotionRepository;
 import com.backend.pishop.repository.ProductRepository;
@@ -55,6 +59,9 @@ public class OrderService {
     private final ProvinceRepository provinceRepository;
     private final WardRepository wardRepository;
     private final EmailService emailService;
+    private final CartItemRepository cartItemRepository;
+    private final CartRepository cartRepository;
+    
 
     private final OrderMapper orderMapper;
 
@@ -164,17 +171,40 @@ public class OrderService {
                             BigDecimal.valueOf(itemReq.getQuantity())
                     )
             );
+
+            // trừ tồn kho
+            product.setQuanlity(
+                    product.getQuanlity() - itemReq.getQuantity()
+            );
         }
 
         order.setItems(orderItems);
         order.setTotalAmount(totalAmount);
-
+        
         Order savedOrder = orderRepository.save(order);
+        orderRepository.flush();
+        
         if(request.getPaymentMethod() == PaymentMethod.COD) {
         	sendOrderConfirmationMail(savedOrder, account);
-
         }
-        
+        Cart cart = cartRepository.findByAccountId(account.getId())
+                .orElse(null);
+         // xóa item khỏi giỏ hàng
+        if (cart != null) {
+
+            Set<Long> productIdsToRemove = request.getItems()
+                    .stream()
+                    .map(OrderItemRequest::getProductId)
+                    .collect(Collectors.toSet());
+
+            cart.getItems().removeIf(item ->
+                    productIdsToRemove.contains(
+                            item.getProduct().getId()
+                    )
+            );
+
+            cartRepository.save(cart);
+        }
         return orderMapper.toResponse(savedOrder);
     }
 
@@ -314,7 +344,7 @@ public class OrderService {
                 .map(orderMapper::toResponse)
                 .toList();
     }
-
+// 
     public boolean requestCancelOrder(Long orderId, Long accountId) {
 
         Order order = orderRepository.findById(orderId)
@@ -333,5 +363,39 @@ public class OrderService {
         orderRepository.save(order);
 
         return true;
+    }
+    
+    // set trạng thái 
+    public OrderResponse paymentBankOrder(Long orderId, Long accountId) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!order.getAccount().getId().equals(accountId)) {
+            throw new RuntimeException("Bạn không có quyền thanh toán đơn này");
+        }
+
+        if (order.getPaymentMethod() != PaymentMethod.BANK) {
+            throw new RuntimeException("Đơn hàng không phải BANK");
+        }
+
+        if (order.getPayStatus() == PayStatus.PAID) {
+            throw new RuntimeException("Đơn hàng đã thanh toán");
+        }
+
+        if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Đơn hàng đã bị hủy");
+        }
+
+        order.setPayStatus(PayStatus.PAID);
+
+        // sau khi thanh toán chuyển sang chờ xác nhận
+        order.setOrderStatus(OrderStatus.CONFIRMATION);
+
+        Order savedOrder = orderRepository.save(order);
+
+        sendOrderConfirmationMail(savedOrder, savedOrder.getAccount());
+
+        return orderMapper.toResponse(savedOrder);
     }
 }

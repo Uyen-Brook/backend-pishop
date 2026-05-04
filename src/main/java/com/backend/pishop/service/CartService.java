@@ -19,6 +19,7 @@ import com.backend.pishop.repository.ProductRepository;
 import com.backend.pishop.response.CartItemResponse;
 import com.backend.pishop.response.CartResponse;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -157,4 +158,18 @@ public class CartService {
         cartRepository.save(cart);// 🔥 auto delete nhờ orphanRemoval
     }
     
+    @Transactional
+    public void removeItems(Long accountId, List<Long> productIds) {
+
+        Cart cart = cartRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        // Xóa tất cả item có productId nằm trong danh sách
+        cart.getItems().removeIf(item ->
+                productIds.contains(item.getProduct().getId())
+        );
+
+        // orphanRemoval = true sẽ tự delete CartItem
+        cartRepository.save(cart);
+    }
 }

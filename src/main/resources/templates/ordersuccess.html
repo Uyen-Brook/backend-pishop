@@ -1,56 +1,141 @@
+<!-- payment-success.html -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <title>Thanh toán thành công</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body{
+            background:#f4f6f9;
+            font-family:Arial,sans-serif;
+        }
+
+        .payment-wrapper{
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:30px 15px;
+        }
+
+        .payment-card{
+            width:100%;
+            max-width:650px;
+            background:#fff;
+            border-radius:20px;
+            padding:40px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.08);
+            text-align:center;
+        }
+
+        .success-icon{
+            width:130px;
+            height:130px;
+            border-radius:50%;
+            background:#22c55e;
+            margin:0 auto 25px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:65px;
+            color:white;
+            font-weight:bold;
+        }
+
+        .title-success{
+            color:#22c55e;
+            font-size:40px;
+            font-weight:700;
+            margin-bottom:10px;
+        }
+
+        .sub-text{
+            color:#6b7280;
+            margin-bottom:30px;
+        }
+
+        .table td{
+            padding:14px;
+            vertical-align:middle;
+        }
+
+        .btn-home{
+            background:#7c3aed;
+            border:none;
+            padding:12px 28px;
+            border-radius:10px;
+            font-weight:600;
+            color:white;
+            text-decoration:none;
+            transition:0.3s;
+        }
+
+        .btn-home:hover{
+            background:#6d28d9;
+            color:white;
+        }
+    </style>
 </head>
 
 <body>
-<!-- back to top -->
 
-<!-- start body -->
-<div class="body py-5">
-    <div class="container">
-        <div class="w-50 m-auto">
-            <!-- Thêm lớp "my-4" để tạo ra khoảng cách trên và dưới tiêu đề trang -->
-            <h1 class="my-3 text-success text-center">Thanh toán thành công</h1>
-            <!-- Sử dụng lớp "alert" và "alert-danger" để tạo ra thông báo lỗi -->
-            <h2 class="my-2">Chi tiết đơn hàng</h2>
-            <!-- Sử dụng lớp "table" và "table-bordered" để tạo ra bảng hiển thị thông tin chi tiết đơn hàng -->
-            <table class="table table-bordered">
-                <tbody>
-                <tr>
-                    <td>Thông tin đơn hàng:</td>
-                    <td><span th:text="${orderId}">[order ID]</span></td>
-                </tr>
-                <tr>
-                    <td>Tổng tiền:</td>
-                    <td><span th:text="${totalPrice}">[total price]</span></td>
-                </tr>
-                <tr>
-                    <td>Thời gian thanh toán:</td>
-                    <td><span th:text="${paymentTime}">[payment time]</span></td>
-                </tr>
-                <tr>
-                    <td>Mã giao dịch:</td>
-                    <td><span th:text="${transactionId}">[transaction ID]</span></td>
-                </tr>
-                </tbody>
-            </table>
-            <a href="/" class="btn btn-primary">Về trang chủ</a>
+<div class="payment-wrapper">
+    <div class="payment-card">
+
+        <div class="success-icon">
+            ✓
         </div>
+
+        <h1 class="title-success">
+            Thanh toán thành công
+        </h1>
+
+        <p class="sub-text">
+            Đơn hàng của bạn đã được thanh toán thành công.
+        </p>
+
+        <h4 class="mb-3 text-start">
+            Chi tiết đơn hàng
+        </h4>
+
+        <table class="table table-bordered">
+            <tbody>
+
+            <tr>
+                <td><strong>Mã đơn hàng</strong></td>
+                <td th:text="${orderId}"></td>
+            </tr>
+
+            <tr>
+                <td><strong>Tổng tiền</strong></td>
+                <td th:text="${totalPrice}"></td>
+            </tr>
+
+            <tr>
+                <td><strong>Thời gian thanh toán</strong></td>
+                <td th:text="${paymentTime}"></td>
+            </tr>
+
+            <tr>
+                <td><strong>Mã giao dịch</strong></td>
+                <td th:text="${transactionId}"></td>
+            </tr>
+
+            </tbody>
+        </table>
+
+        <div class="mt-4">
+            <a href="http://localhost:5173" class="btn-home">
+                Về trang chủ
+            </a>
+        </div>
+
     </div>
 </div>
-<!-- end body -->
 
-
-<!-- start footer -->
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
 </body>
-
 </html>
